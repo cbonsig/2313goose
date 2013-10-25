@@ -36,7 +36,7 @@ with last record = xx, xx, where xx is the 00.00 first free page.
 - The size is deducted from the num next page (under 1 page)
 """
 
-DEBUG = False
+DEBUG = True
 
 PAGELEN = 264
 TRAIL_CHAR = '\0'

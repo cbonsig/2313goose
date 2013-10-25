@@ -22,9 +22,10 @@ DataFlash dflash;
 
 void setup()
 {
-  Serial.begin(9600);
-    
-  dflash.setup(10,6,7); // csPin, resetPin, wpPin
+  
+  uint8_t status;
+  DataFlash::ID id;
+
   analogReference(DEFAULT); // restore analog reference (to have 5V on it!)
   
   // status LEDS  
@@ -33,6 +34,38 @@ void setup()
   pulse(LED_HB, 2);
   pulse(LED_W, 2);
 
+  Serial.begin(9600);
+  SPI.begin();
+    
+  dflash.setup(10,6,7); // csPin, resetPin, wpPin
+  
+  delay(10);
+  dflash.begin();
+  
+  status = dflash.status();
+  
+//  /* Display status register */
+//  Serial.print("Status register :");
+//  Serial.print(status, BIN);
+//  Serial.print('\n');
+//
+//  /* Display manufacturer and device ID */
+//  Serial.print("Manufacturer ID :\n");  // Should be 00011111 (1F)
+//  Serial.print(id.manufacturer, HEX);
+//  Serial.print('\n');
+//
+//  Serial.print("Device ID (part 1) :\n"); // Should be 00011111 (1F)
+//  Serial.print(id.device[0], HEX);
+//  Serial.print('\n');
+//
+//  Serial.print("Device ID (part 2)  :\n"); // Should be 00000000 (0)
+//  Serial.print(id.device[1], HEX);
+//  Serial.print('\n');
+//
+//  Serial.print("Extended Device Information String Length  :\n"); // 00000000 (0)
+//  Serial.print(id.extendedInfoLength, HEX);
+//  Serial.print('\n');
+ 
 }
 
 // this provides a heartbeat on pin 9 (not 13 because already taken) , so you can tell the software is running.
@@ -61,7 +94,9 @@ void pulse(int pin, int times) {
 
 void loop(void) {
   // light the heartbeat LED
+
   heartbeat();
+  
   if (Serial.available()) {
     flasher();
   }
@@ -78,20 +113,20 @@ void read_page() {
   // R_hilo_ -> OK+page
   uint8_t c;
   
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}
+  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC); return;}
   unsigned int page_id = ((unsigned int)getch()<<8) + getch();
 
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;}
+  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC2); return;}
   dflash.pageToBuffer(page_id,1); 
 
 
   // envoie OK
-  Serial.print((char)STK_OK);
+  Serial.write((char)STK_OK);
   
   // envoie buffer
   for (unsigned int i=0;i<PAGE_LEN;i++) {
     dflash.bufferRead(1,i);
-    Serial.print((char) SPI.transfer(0xff));
+    Serial.write((char) SPI.transfer(0xff));
   }  
 }
 
@@ -101,11 +136,11 @@ void write_page() {
   
   uint8_t c;
 
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}
+  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC); return ;}
 
   unsigned int page_id = (getch()<<8) + getch();
   
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;}
+  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC2); return ;}
   
   
   for (unsigned int i=0;i<PAGE_LEN;i++) {
@@ -119,7 +154,7 @@ void write_page() {
   dflash.bufferToPage(0, page_id); //write the buffer to the memory on page: here
   //pulse(LED_W,1); // ralentit trop
 
-  Serial.print((char)STK_OK);
+  Serial.write((char)STK_OK);
 }
 
 
@@ -128,7 +163,7 @@ int flasher() {
   switch (ch) {
   case 'H': // Hello
     if (getch()!=CRC_EOP) {
-      Serial.print((char)STK_NOSYNC5);
+      Serial.write((char)STK_NOSYNC5);
     } else {
       char *welcome = "Salut, envoyez la puree!\n";
       for (char *c = welcome;*c != '\0';c++) {
