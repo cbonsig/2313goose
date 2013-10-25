@@ -15,24 +15,25 @@ wav files should be provided in commandline
 matcher myflasher data speed (9600) : 
 $ stty -F /dev/ttyUSB0 9600
 
-(attention ne pas aller trop vite avec le serial, 9600 est OK)
+(be careful not to go too fast with serial, 9600 is OK)
 
 '''
 
 """
-format de la memoire : 
-264 bytes sectors
+format the memory:
+264 bytes Sectors
 
--page zero = SIGNATURE +FAT = liste de (HiPagestart,LoPagestart,HiLastBytes,LoLastBytes) avec dernier record = xx,xx,00,00 où xx est la premiere page libre.
-# ne pas trop y ecrire souvent !
+zero-page = SIGNATURE + FAT = list (HiPagestart, LoPagestart, HiLastBytes, LoLastBytes)
+with last record = xx, xx, where xx is the 00.00 first free page.
+# Do not often write too much!
 
-- page N : nom du fichier padde avec des espaces
-- page N+1 ... M : data
-- dans la derniere page M, seulement lastbytes octets sur la page. (jamais nul)
-(prochaine page libre M+1)
+- Page N: padde file name with spaces
+- Page 1 ... N M: data
+- M in the last page, just lastbytes bytes on the page. (never null)
+(next page Free M +1)
 
-- 264/4 = 66 fichiers max (ca ira)
-- la taille est déduite du num de page suivante (moins 1 page !)
+- 264/4 = 66 files max (ca ira)
+- The size is deducted from the num next page (under 1 page)
 """
 
 DEBUG = False
@@ -97,11 +98,10 @@ class Programmer :
 		return s
 
 	def write(self,filename,str,read=False) : 
-		'''ecrit un buffer complet apres le dernier enregistrement, avec des zeros"
-		queue de fichier remplie avec des TRAIL_CHAR
-		n'ecrit pas la table des matieres mais prepare la structure en mémoire.
-		la tdm est ecrite en dernier.
-		ecrit le nom du fichier en premier
+		'''wrote a full buffer after the last record, with zeros
+		file trailer filled with TRAIL_CHAR
+		do not write the table of contents but prepare the structure in memory.
+		the tdm is written last. writing the name of the first file
 		'''
 
 		start_page = self.contenttable[-1][0] # fail if not formatted ie contenttable is empty
