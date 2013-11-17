@@ -290,7 +290,7 @@ def help() :
 	  read_page <N>
 	"""%sys.argv[0]
 if __name__=='__main__' :
-	p=Programmer('/dev/tty.usbmodem1411')
+	p=Programmer('/dev/tty.usbmodem1d1131')
 	if len(sys.argv)==1 : 
 		help()
 	if sys.argv[1]=='ls' : 
