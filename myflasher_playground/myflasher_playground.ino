@@ -122,19 +122,19 @@ void read_page() {
   // R_hilo_ -> OK+page
   uint8_t c;
   
-  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC); return;}
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}
   unsigned int page_id = ((unsigned int)getch()<<8) + getch();
 
-  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC2); return;}
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;}
   dflash.Page_To_Buffer(page_id,2); 
 
 
   // send OK
-  Serial.write((char)STK_OK);
+  Serial.print((char)STK_OK);
   
   // send buffer
   for (unsigned int i=0;i<PAGE_LEN;i++) {
-    Serial.write((char) dflash.Buffer_Read_Byte(2,i));
+    Serial.print((char) dflash.Buffer_Read_Byte(2,i));
   }  
 }
 
@@ -144,11 +144,11 @@ void write_page() {
   
   uint8_t c;
 
-  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC); return ;}
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}
 
   unsigned int page_id = (getch()<<8) + getch();
   
-  if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC2); return ;}
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;}
   
   for (unsigned int i=0;i<PAGE_LEN;i++) {
     c = getch(); 
@@ -160,7 +160,7 @@ void write_page() {
   dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
   //pulse(LED_W,1); // too slow
 
-  Serial.write((char)STK_OK);
+  Serial.print((char)STK_OK);
 }
 
 
@@ -170,7 +170,7 @@ int flasher() {
     
   case 'H': // Hello
     if (getch()!=CRC_EOP) {
-      Serial.write((char)STK_NOSYNC5);
+      Serial.print((char)STK_NOSYNC5);
     } else {
       char *welcome = "Hello, this thing is working!\n";
       for (char *c = welcome;*c != '\0';c++) {
