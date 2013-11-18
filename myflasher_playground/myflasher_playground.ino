@@ -121,16 +121,36 @@ uint8_t getch() {
 void read_page() {
   // R_hilo_ -> OK+page
   uint8_t c;
-  
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}
-  unsigned int page_id = ((unsigned int)getch()<<8) + getch();
 
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;}
+  // what i think is happening here...
+  // the read command should be in this format: "R_##_"
+  // ...where the '_' is actually a CRC_EOP (space) and ## is the page number in two characters
+  // so, in this function...
+  // an 'R' character has been received, and now the next characters are expected to be
+  // a CRC_EOP (a.k.a. a space character) followed by two characters defining the page value
+  // if the first character isn't a space, return a '!' and get outta here
+  // define the page_id using the next two characters
+  // then if the next character isn't a space, return a '%' and get outta here
+  // move the requested page to buffer 2
+  // send an OK ('$')
+  // print out the value of the buffer
+
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}  // STK_NOSYNC  = '!'
+  unsigned int page_id = ((unsigned int)getch()<<8) + getch();      // first char shifted left by 8 + next char
+
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;} // STK_NOSYNC2  = '%'
+  
+  // debug: print the page_id if we get this far
+  Serial.print(page_id);
+  // the command "R 10 " results in "12337" --- i think chars get converted in the Page_To_Buffer function
+
+  // i think the code is hanging here ... we never get to the '$'
   dflash.Page_To_Buffer(page_id,2); 
+  // #FAIL
 
 
   // send OK
-  Serial.print((char)STK_OK);
+  Serial.print((char)STK_OK);                                        // STK_OK  = '$'
   
   // send buffer
   for (unsigned int i=0;i<PAGE_LEN;i++) {
@@ -144,11 +164,11 @@ void write_page() {
   
   uint8_t c;
 
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}  // STK_NOSYNC  = '!'
 
   unsigned int page_id = (getch()<<8) + getch();
   
-  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;}
+  if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;} // STK_NOSYNC2  = '%'
   
   for (unsigned int i=0;i<PAGE_LEN;i++) {
     c = getch(); 
@@ -160,7 +180,7 @@ void write_page() {
   dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
   //pulse(LED_W,1); // too slow
 
-  Serial.print((char)STK_OK);
+  Serial.print((char)STK_OK);                                        // STK_OK  = '$'
 }
 
 
@@ -170,7 +190,7 @@ int flasher() {
     
   case 'H': // Hello
     if (getch()!=CRC_EOP) {
-      Serial.print((char)STK_NOSYNC5);
+      Serial.print((char)STK_NOSYNC5);                               // STK_NOSYNC5 = '%'
     } else {
       char *welcome = "Hello, this thing is working!\n";
       for (char *c = welcome;*c != '\0';c++) {
@@ -190,15 +210,15 @@ int flasher() {
   // expecting a command, not CRC_EOP
   // this is how we can get back in sync
   case CRC_EOP:
-    Serial.write((char) STK_NOSYNC3);
+    Serial.write((char) STK_NOSYNC3);                                 // STK_NOSYNC3 = '*'
     break;
 
     // anything else we will return STK_UNKNOWN
   default:
     if (CRC_EOP == getch()) 
-      Serial.write((char)STK_UNKNOWN);
+      Serial.write((char)STK_UNKNOWN);                                // STK_UNKNOWN = '?'
     else
-      Serial.write((char)STK_NOSYNC4);
+      Serial.write((char)STK_NOSYNC4);                                // STK_NOSYNC4 = '#'
   }
 }
 

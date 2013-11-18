@@ -56,7 +56,10 @@ class Programmer :
 
 		time.sleep(1.5)
 
-		# self.tty.write(' ') # resync
+		self.tty.write(' ') # resync
+		# why is the above line here?
+		# with this line, the first character echoed is a '*'
+		# meaning STK_NOSYNC3
 
 		# read intro screen
 		self.tty.write('H ')
@@ -123,7 +126,7 @@ class Programmer :
 		# write data
 		print >>sys.stderr,"Will write %d pages"%(len(str)/PAGELEN)
 		pg = 0 # written pages
-		while (pg+1)*PAGELEN<len(str) : # il reste un buffer
+		while (pg+1)*PAGELEN<len(str) : # there is a buffer
 			buf = str[pg*PAGELEN:(pg+1)*PAGELEN]
 			self.write_page(start_page+pg+1,buf)
 			if read : 
@@ -134,13 +137,13 @@ class Programmer :
 					print >>sys.stderr,repr(buf2)
 			pg+=1
 
-		# dernier buffer
+		# last buffer
 		a1=str[pg*PAGELEN:]
 		a2=TRAIL_CHAR*(PAGELEN-len(a1))
 		self.write_page(start_page+pg+1,a1+a2)
 		pg += 1
 
-		# table des matieres
+		# table of contents
 		self.contenttable[-1]=(self.contenttable[-1][0],len(a1)) # replace with new end buffer offset
 		self.contenttable.append((start_page+pg+1,0))
 
@@ -183,7 +186,7 @@ class Programmer :
 
 	def write_table(self) : 
 		assert self.contenttable,"No content table read yet!"
-		# test croissant ?
+		# increasing test ?
 		# test offsets are zero except the last
 		print >>sys.stderr,"writing table to chip"
 		buf=SIGNATURE+''.join(chr(page>>8)+chr(page&0xff)+chr(offset>>8)+chr(offset&0xff) for page,offset in self.contenttable)
