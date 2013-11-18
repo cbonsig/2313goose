@@ -56,7 +56,7 @@ class Programmer :
 
 		time.sleep(1.5)
 
-		self.tty.write(' ') # resync
+		# self.tty.write(' ') # resync
 
 		# read intro screen
 		self.tty.write('H ')
@@ -84,7 +84,7 @@ class Programmer :
 		s='W '+chr(pageid>>8)+chr(pageid&0xff)+' '+buf
 		#print >>sys.stderr,'sending',repr(s)
 		self.tty.write(s)
-		print >>sys.stderr,' ...',
+		print >>sys.stderr,' ... ',
 		r=self.getch()
 		assert r=='$','expected $, got %s'%repr(r) # ok
 		print >>sys.stderr,"ok, done"
@@ -178,13 +178,13 @@ class Programmer :
 			r = buf[x:x+4]
 			# read entry
 			self.contenttable.append(((ord(r[0])<<8)+ord(r[1]),(ord(r[2])<<8)+ord(r[3])))
-			if r[2:4] == '\0\0' : break # mais inclut quand même le dernier
+			if r[2:4] == '\0\0' : break # but still includes the last
 			x += 4
 
 	def write_table(self) : 
 		assert self.contenttable,"No content table read yet!"
 		# test croissant ?
-		# test aucun offset a zero sauf le dernier
+		# test offsets are zero except the last
 		print >>sys.stderr,"writing table to chip"
 		buf=SIGNATURE+''.join(chr(page>>8)+chr(page&0xff)+chr(offset>>8)+chr(offset&0xff) for page,offset in self.contenttable)
 		assert len(buf)<PAGELEN,'table too big to be written !'

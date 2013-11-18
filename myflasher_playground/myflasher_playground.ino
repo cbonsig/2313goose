@@ -5,20 +5,38 @@ based on https://github.com/makapuf/2313goose
 with dataflash.c from Arduino playground http://playground.arduino.cc/Code/Dataflash
 
 17.nov.2013
-doesn't seem to work. results in serial terminal:
-H + newline = % = STK_NOSYNC2
-R + newline = ! = STK_NOSYNC
-W + newline = ! = STK_NOSYNC
 
-Ah-ha. now with this:
-H + space + newline = Hello, this thing is working!
+set arduino serial terminal to "newline" mode
 
+confirmed that basic operation is correct
+  H + space (+ newline) = Hello, this thing is working!
+but flasher.py (as modified today) is still not working
+format command gives this result:
+
+$ python flasher.py format
+Hello, this thing is working!
+synced
+Are you sure to erase chip ? [y/N]y
+writing table to chip
+writing page 0  ...Traceback (most recent call last):
+  File "flasher.py", line 315, in <module>
+    p.format()
+  File "flasher.py", line 223, in format
+    self.write_table()
+  File "flasher.py", line 191, in write_table
+    self.write_page(0,buf+TRAIL_CHAR*(PAGELEN-len(buf)))
+  File "flasher.py", line 89, in write_page
+    assert r=='$','expected $, got %s'%repr(r) # ok
+AssertionError: expected $, got '#'
+
+can't find any combination of inputs in terminal that cause arduino to respond 
+with a $ (ok) response. only get !, #, *, or ? (or "Hello, this thing is working!")
 
 *****/
 #include "dataflash.h"
 
 #define LED_HB 9 // 13 is already taken by a pin !
-#define LED_W 6 // DESACTIVE
+#define LED_W 6 // off
 
 #define PAGE_LEN 264 
 
@@ -101,10 +119,10 @@ void read_page() {
   dflash.Page_To_Buffer(page_id,2); 
 
 
-  // envoie OK
+  // send OK
   Serial.write((char)STK_OK);
   
-  // envoie buffer
+  // send buffer
   for (unsigned int i=0;i<PAGE_LEN;i++) {
     Serial.write((char) dflash.Buffer_Read_Byte(2,i));
   }  
@@ -128,9 +146,9 @@ void write_page() {
   }
   
 
-  // ecrit effectivement la page
+  // actually written page
   dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
-  //pulse(LED_W,1); // ralentit trop
+  //pulse(LED_W,1); // too slow
 
   Serial.write((char)STK_OK);
 }
