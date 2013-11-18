@@ -1,5 +1,21 @@
-#include "DataFlash.h"
-#include <SPI.h>
+/*****
+myflasher_playground.ino
+
+based on https://github.com/makapuf/2313goose
+with dataflash.c from Arduino playground http://playground.arduino.cc/Code/Dataflash
+
+17.nov.2013
+doesn't seem to work. results in serial terminal:
+H + newline = % = STK_NOSYNC2
+R + newline = ! = STK_NOSYNC
+W + newline = ! = STK_NOSYNC
+
+Ah-ha. now with this:
+H + space + newline = Hello, this thing is working!
+
+
+*****/
+#include "dataflash.h"
 
 #define LED_HB 9 // 13 is already taken by a pin !
 #define LED_W 6 // DESACTIVE
@@ -18,14 +34,13 @@
 #define STK_NOSYNC5 '%'
 #define CRC_EOP ' ' 
 
-DataFlash dflash; 
+Dataflash dflash; 
 
 void setup()
 {
-  
-  uint8_t status;
-  DataFlash::ID id;
-
+  Serial.begin(9600);
+    
+  dflash.init(); //initialize the memory (pins are defined in dataflash.cpp)
   analogReference(DEFAULT); // restore analog reference (to have 5V on it!)
   
   // status LEDS  
@@ -34,38 +49,6 @@ void setup()
   pulse(LED_HB, 2);
   pulse(LED_W, 2);
 
-  Serial.begin(9600);
-  SPI.begin();
-    
-  dflash.setup(10,6,7); // csPin, resetPin, wpPin
-  
-  delay(10);
-  dflash.begin();
-  
-  status = dflash.status();
-  
-//  /* Display status register */
-//  Serial.print("Status register :");
-//  Serial.print(status, BIN);
-//  Serial.print('\n');
-//
-//  /* Display manufacturer and device ID */
-//  Serial.print("Manufacturer ID :\n");  // Should be 00011111 (1F)
-//  Serial.print(id.manufacturer, HEX);
-//  Serial.print('\n');
-//
-//  Serial.print("Device ID (part 1) :\n"); // Should be 00011111 (1F)
-//  Serial.print(id.device[0], HEX);
-//  Serial.print('\n');
-//
-//  Serial.print("Device ID (part 2)  :\n"); // Should be 00000000 (0)
-//  Serial.print(id.device[1], HEX);
-//  Serial.print('\n');
-//
-//  Serial.print("Extended Device Information String Length  :\n"); // 00000000 (0)
-//  Serial.print(id.extendedInfoLength, HEX);
-//  Serial.print('\n');
- 
 }
 
 // this provides a heartbeat on pin 9 (not 13 because already taken) , so you can tell the software is running.
@@ -94,9 +77,7 @@ void pulse(int pin, int times) {
 
 void loop(void) {
   // light the heartbeat LED
-
   heartbeat();
-  
   if (Serial.available()) {
     flasher();
   }
@@ -117,7 +98,7 @@ void read_page() {
   unsigned int page_id = ((unsigned int)getch()<<8) + getch();
 
   if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC2); return;}
-  dflash.pageToBuffer(page_id,1); 
+  dflash.Page_To_Buffer(page_id,2); 
 
 
   // envoie OK
@@ -125,8 +106,7 @@ void read_page() {
   
   // envoie buffer
   for (unsigned int i=0;i<PAGE_LEN;i++) {
-    dflash.bufferRead(1,i);
-    Serial.write((char) SPI.transfer(0xff));
+    Serial.write((char) dflash.Buffer_Read_Byte(2,i));
   }  
 }
 
@@ -142,16 +122,14 @@ void write_page() {
   
   if (getch()!=CRC_EOP) { Serial.write((char)STK_NOSYNC2); return ;}
   
-  
   for (unsigned int i=0;i<PAGE_LEN;i++) {
-    c = getch();
-    dflash.bufferWrite(0,i); // write to buffer 1
-    SPI.transfer(c);
+    c = getch(); 
+    dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
   }
   
 
   // ecrit effectivement la page
-  dflash.bufferToPage(0, page_id); //write the buffer to the memory on page: here
+  dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
   //pulse(LED_W,1); // ralentit trop
 
   Serial.write((char)STK_OK);
@@ -161,18 +139,19 @@ void write_page() {
 int flasher() { 
   uint8_t ch = getch();
   switch (ch) {
+    
   case 'H': // Hello
     if (getch()!=CRC_EOP) {
       Serial.write((char)STK_NOSYNC5);
     } else {
-      char *welcome = "Salut, envoyez la puree!\n";
+      char *welcome = "Hello, this thing is working!\n";
       for (char *c = welcome;*c != '\0';c++) {
         Serial.write(*c);
       }
     }
     break;
+  
   case 'R': // Read Page X
-
     read_page(); 
     break;
 

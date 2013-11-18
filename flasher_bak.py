@@ -45,22 +45,42 @@ SIGNATURE = 'YEAH'
 
 class Programmer : 
 
+	print "2a. i am now in the class Programmer"
+
 	def __init__(self,port) : 
 		
+		print "2b. i am now in the class Programmer __init__ definition"
+
 		self.contenttable = [] # tuples (page_start,last_byte)
 
+		print "2c. i have defined contenttable"
+
+		#self.tty = open(port,'w+')
+		#self.tty = open('/dev/tty.usbmodem1d1131','w+')
+		#self.tty = serial.Serial('/dev/tty.usbmodem1d1131')
+		#self.tty = open('/dev/tty.usbmodem1d1131','w', 1)
+		
 		try:
+			print "2d1. i am about to try to open self.tty"
 			self.tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600, timeout=1)
+			print "2d2. it appears that i have opened self.tty"
 		except:
-			print "i failed to open the serial port"
+			print "2e. i have failed to open self.tty"
 
 		time.sleep(1.5)
 
-		self.tty.write(' ') # resync
+		print "2d. i have slept for 1.5s and made it past the __init__ try/except"
+
+		# self.tty.write(' ') # resync
+
+		print "2e. i skipped writing a blank to the tty"
 
 		# read intro screen
 		self.tty.write('H ')
+		print "2f. i have written H+(blank) to the tty"
 		self.tty.write('\n')
+
+		print "2g. i have written a newline to the tty"
 
 		r='' # readline ?
 		while r!='\n' : 
@@ -72,6 +92,7 @@ class Programmer :
 
 	def getch(self) :
 		r=''
+		print "2h. i am about to try to read one character"
 		while r=='': 
 			r=self.tty.read(1)
 			if not r : time.sleep(0.020)
@@ -301,13 +322,21 @@ def help() :
 	  read_page <N>
 	"""%sys.argv[0]
 if __name__=='__main__' :
+	
+	print "1. hello i am here"
 
-	p=Programmer('/dev/tty.usbmodem1d1131')
+	try:
+		print "2. i am about to set p"
+		p=Programmer('/dev/tty.usbmodem1d1131')
+		print "3. i have now set p"
+	except:
+		print "4. i have failed to open usb"
+
+	print "5. i am now past the try/except"
 
 	if len(sys.argv)==1 : 
 		help()
-		exit
-	elif sys.argv[1]=='ls' : 
+	if sys.argv[1]=='ls' : 
 		p.ls()
 	elif sys.argv[1]=='format' :
 		sure=raw_input('Are you sure to erase chip ? [y/N]')
