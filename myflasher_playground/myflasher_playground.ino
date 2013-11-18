@@ -4,6 +4,16 @@ myflasher_playground.ino
 based on https://github.com/makapuf/2313goose
 with dataflash.c from Arduino playground http://playground.arduino.cc/Code/Dataflash
 
+DataFlash AT45DB161D <-----> Arduino Uno
+1 <--- black -----> 11   (MISO)
+2 <--- yellow ----> 13   (SCK)
+3 <--- blue ------> 6    (RESET)
+4 <--- white -----> 10   (CS aka SS)
+5 <--- yellow ----> 7    (WP)
+6 <--- green -----> 3.3V (POWER)
+7 <--- white -----> GND  (GND)
+8 <--- red -------> 12   (MOSI)
+
 17.nov.2013
 
 set arduino serial terminal to "newline" mode
