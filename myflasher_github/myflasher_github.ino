@@ -1,5 +1,5 @@
 /*****
-myflasher_playground.ino
+myflasher_github.ino
 
 based on https://github.com/makapuf/2313goose
 with dataflash.c from Arduino playground http://playground.arduino.cc/Code/Dataflash
@@ -42,8 +42,24 @@ AssertionError: expected $, got '#'
 can't find any combination of inputs in terminal that cause arduino to respond 
 with a $ (ok) response. only get !, #, *, or ? (or "Hello, this thing is working!")
 
+24.nov.2013
+
+attempt to port from "playground" dataflash library to github dataflash library
+arduino code seems to work as intended
+now getting $ response, looks all good
+
+problem now is with the python code, which now mysteriously
+fails to read characters back from serial
+(though it works fine in serial monitor, or direct tty session)
+
+next:
+try all this again when not tired (cycle power?)
+first try to get serialtest.py to work
+then fix flasher.py
+
 *****/
-#include "dataflash.h"
+#include <SPI.h>
+#include "DataFlash.h"
 
 #define LED_HB 9 // 13 is already taken by a pin !
 #define LED_W 6 // off
@@ -62,13 +78,36 @@ with a $ (ok) response. only get !, #, *, or ? (or "Hello, this thing is working
 #define STK_NOSYNC5 '%'
 #define CRC_EOP ' ' 
 
-Dataflash dflash; 
+DataFlash dataflash;
+uint8_t   loop_cnt;
+uint16_t  page;
 
 void setup()
 {
+  uint8_t status;
+  DataFlash::ID id;
+
+  /* Initialize SPI */
+  SPI.begin();
+
+  /* Wait for 1 second */
+  delay(1000);
+
+  /* Initialize DataFlash CS, Reset, WP */
+  dataflash.setup(10,6,7);
+     
+  delay(10);
+  
+  dataflash.begin();
+  
+  /* Read status register */
+  status = dataflash.status();
+  
+  /* Read manufacturer and device ID */
+  dataflash.readID(id); 
+
   Serial.begin(9600);
-    
-  dflash.init(); //initialize the memory (pins are defined in dataflash.cpp)
+     
   analogReference(DEFAULT); // restore analog reference (to have 5V on it!)
   
   // status LEDS  
@@ -77,6 +116,8 @@ void setup()
   pulse(LED_HB, 2);
   pulse(LED_W, 2);
 
+  loop_cnt = 0;
+  page     = 0;
 }
 
 // this provides a heartbeat on pin 9 (not 13 because already taken) , so you can tell the software is running.
@@ -136,16 +177,16 @@ void read_page() {
   // print out the value of the buffer
 
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}  // STK_NOSYNC  = '!'
-  unsigned int page_id = ((unsigned int)getch()<<8) + getch();      // first char shifted left by 8 + next char
+  uint16_t page_id = ((uint16_t)getch()<<8) + getch();      // first char shifted left by 8 + next char
 
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;} // STK_NOSYNC2  = '%'
   
   // debug: print the page_id if we get this far
-  Serial.print(page_id);
+  // Serial.print(page_id);
   // the command "R 10 " results in "12337" --- i think chars get converted in the Page_To_Buffer function
 
   // i think the code is hanging here ... we never get to the '$'
-  dflash.Page_To_Buffer(page_id,2); 
+  dataflash.pageToBuffer(page_id,2); 
   // #FAIL on Page_To_Buffer
 
 
@@ -153,8 +194,9 @@ void read_page() {
   Serial.print((char)STK_OK);                                        // STK_OK  = '$'
   
   // send buffer
-  for (unsigned int i=0;i<PAGE_LEN;i++) {
-    Serial.print((char) dflash.Buffer_Read_Byte(2,i));
+  for (uint16_t i=0;i<PAGE_LEN;i++) {
+    dataflash.bufferRead(2,i);
+    Serial.print((char) SPI.transfer(0xff));
   }  
 }
 
@@ -172,12 +214,15 @@ void write_page() {
   
   for (unsigned int i=0;i<PAGE_LEN;i++) {
     c = getch(); 
-    dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
+    //dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
+    dataflash.bufferWrite(1,i);
+    SPI.transfer(c);
   }
   
 
   // actually written page
-  dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
+  //dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
+  dataflash.bufferToPage(1, page_id);
   //pulse(LED_W,1); // too slow
 
   Serial.print((char)STK_OK);                                        // STK_OK  = '$'

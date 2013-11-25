@@ -49,34 +49,63 @@ class Programmer :
 		
 		self.contenttable = [] # tuples (page_start,last_byte)
 
+		print "i am about to try to open usbmodem1a1231"
+
 		try:
-			self.tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600, timeout=1)
+			print "i am inside the try"
+			# self.tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600, timeout=1)
+			# self.tty = serial.Serial('/dev/tty.usbmodem1a1231', 9600, timeout=1)
+			self.tty = serial.Serial('/dev/tty.usbmodem1a1231', 9600, timeout=0)
+			print "i past the serial.Serial"
 		except:
 			print "i failed to open the serial port"
 
+		print "i am before the 1.5s sleep"
+
 		time.sleep(1.5)
+		print "i am past the 1.5s sleep"
 
 		self.tty.write(' ') # resync
+		# self.tty.write('\n') # why no newline?
 		# why is the above line here?
 		# with this line, the first character echoed is a '*'
 		# meaning STK_NOSYNC3
 
+
+		print "i am past the write a space line"
+
 		# read intro screen
 		self.tty.write('H ')
+
+		print "i am past the H"
+
 		self.tty.write('\n')
 
+		print "i am past the newline"
+
 		r='' # readline ?
+
+		print "i am past empty r"
+
 		while r!='\n' : 
-			r=self.getch() 
+			print "i am before the getch"
+			r=self.getch()                   
+			print "i am after the getch"
 			sys.stderr.write(r)
 		# print >>sys.stderr,"synced"
 		print "synced"
 		
 
 	def getch(self) :
+		print "in getch"
 		r=''
+		print "defied empty r"
 		while r=='': 
-			r=self.tty.read(1)
+			# print "before tty.read"
+			# self.tty.read(1)
+			self.tty.read()                  # getting stuck here! why?? never reads characters
+			# print "after tty.read"
+			# print r
 			if not r : time.sleep(0.020)
 		return r
 
@@ -305,7 +334,7 @@ def help() :
 	"""%sys.argv[0]
 if __name__=='__main__' :
 
-	p=Programmer('/dev/tty.usbmodem1d1131')
+	p=Programmer('/dev/tty.usbmodem1a1231')
 
 	if len(sys.argv)==1 : 
 		help()
