@@ -49,52 +49,30 @@ class Programmer :
 		
 		self.contenttable = [] # tuples (page_start,last_byte)
 
-		print "i am about to try to open usbmodem1d1131"
+		self.tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600, timeout=1)
 
-		tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600)
+		print self.tty.name
 
-		print tty.name
+		time.sleep(4.0)
+		self.tty.flush()
 
-		print "i am before the 2.0s sleep"
+		self.tty.write(" H ")
 
-		time.sleep(2.0)
-		tty.flush()
-
-		tty.write(" H ")
-
-		print "i am past the H"
-
-		print tty.readline()
-
-		#self.tty.write('\n')
-
-		#print "i am past the newline"
+		# print self.tty.readline()
 
 		r='' # readline ?
 
-		print "i am past empty r"
-
-		print tty.readline() # just a test
-
 		while r!='\n' : 
-			print "i am before the getch"
 			r=self.getch()                   
-			print "i am after the getch"
 			sys.stderr.write(r)
 		# print >>sys.stderr,"synced"
 		print "synced"
 		
 
 	def getch(self) :
-		print "in getch"
-		r=""
-		print "defined empty r"
-		while r=="": 
-			# print "before tty.read"
-			# self.tty.read(1)
-			self.tty.read()                  # getting stuck here! why?? never reads characters
-			# print "after tty.read"
-			# print r
+		r=''
+		while r=='': 
+			r = self.tty.read(1)
 			if not r : time.sleep(0.020)
 		return r
 

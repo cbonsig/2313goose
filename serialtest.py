@@ -3,21 +3,11 @@
 import sys,time,struct,wave, os.path
 import serial # requires pySerial to be installed
 
-
-def getch(serialObject) :
-		r=''
-		while r=='': 
-			serialObject.read(1)  
-			if not r :
-				time.sleep(0.020)
-		return r
-
-
-tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600)
+tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600, timeout=1)
 
 print tty.name
 
-time.sleep(2.0)
+time.sleep(4.0) # this sometimes fails with 2.0, but seems to work with 3.0 (wtf)
 
 tty.flush()
 
