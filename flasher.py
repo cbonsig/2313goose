@@ -12,10 +12,6 @@ wav files should be provided in commandline
 2) put all files to Flash
 3) prepare a small .h file with all addresses for program use
 
-
-matcher myflasher data speed (9600) : 
-$ stty -f /dev/tty.usbmodem1d1131 9600
-
 (be careful not to go too fast with serial, 9600 is OK)
 
 '''
@@ -37,12 +33,97 @@ with last record = xx, xx, where xx is the 00.00 first free page.
 - The size is deducted from the num next page (under 1 page)
 """
 
+"""
+cbonsig_notes
+
+25.nov.2013
+flasher.py initializes properly. attempts to format the flash fail as shown below:
+
+Craigs-MacBook-Pro:2313goose cbonsignore$ python flasher.py format
+/dev/tty.usbmodem1d1131
+*Hello, this thing is working!
+synced
+Are you sure to erase chip ? [y/N]y
+writing table to chip
+writing page 0  ...  ok, done
+content table written successfully with 0 files
+reading content table from chip : 
+reading page 0 : done reading page:0
+Error : unformatted flash (should start with YEAH)
+(debug) Dump of the first sector : 
+...
+
+Changing SIGNATURE to something other than 'YEAH' has same outcome.
+Changing SIGNATURE to '' allows format to (appear to) succeed
+add_wav appears to be successful -- but after successfully transferring the file,
+it does not appear in the content table, nor does it appear when using ls. Sample output below:
+
+Craigs-MacBook-Pro:2313goose cbonsignore$ python flasher.py add_wav 1.wav 
+/dev/tty.usbmodem1d1131
+*Hello, this thing is working!
+synced
+1 channels
+1 byte width
+8000 samples per second
+reading page 0 : done reading page:0
+Adding  1.wav ...
+writing page 0  ...  ok, done
+Will write 20 pages
+writing page 1  ...  ok, done
+writing page 2  ...  ok, done
+writing page 3  ...  ok, done
+writing page 4  ...  ok, done
+writing page 5  ...  ok, done
+writing page 6  ...  ok, done
+writing page 7  ...  ok, done
+writing page 8  ...  ok, done
+writing page 9  ...  ok, done
+writing page 10  ...  ok, done
+writing page 11  ...  ok, done
+writing page 12  ...  ok, done
+writing page 13  ...  ok, done
+writing page 14  ...  ok, done
+writing page 15  ...  ok, done
+writing page 16  ...  ok, done
+writing page 17  ...  ok, done
+writing page 18  ...  ok, done
+writing page 19  ...  ok, done
+writing page 20  ...  ok, done
+writing page 21  ...  ok, done
+writing table to chip
+writing page 0  ...  ok, done
+content table written successfully with 1 files
+reading content table from chip : 
+reading page 0 : done reading page:0
+content table: [(0, 0)]
+ -- content of chip : 
+ --
+ - next free page (over 2048) :  0  - 528 kbytes left
+reading page 0 : done reading page:0
+content table: [(0, 0)]
+ -- content of chip : 
+ --
+ - next free page (over 2048) :  0  - 528 kbytes left
+Craigs-MacBook-Pro:2313goose cbonsignore$ python flasher.py ls
+/dev/tty.usbmodem1d1131
+*Hello, this thing is working!
+synced
+reading page 0 : done reading page:0
+content table: [(0, 0)]
+ -- content of chip : 
+ --
+ - next free page (over 2048) :  0  - 528 kbytes left
+
+
+"""
+
+
 DEBUG = True
 
 PAGELEN = 264
 TRAIL_CHAR = '\0'
 # SIGNATURE = 'YEAH'                # formatting fails with -- Error : unformatted flash (should start with YEAH)
-SIGNATURE = ''
+SIGNATURE = 'YEAH'
 
 class Programmer : 
 
