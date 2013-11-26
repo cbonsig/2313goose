@@ -41,7 +41,8 @@ DEBUG = True
 
 PAGELEN = 264
 TRAIL_CHAR = '\0'
-SIGNATURE = 'YEAH'
+# SIGNATURE = 'YEAH'                # formatting fails with -- Error : unformatted flash (should start with YEAH)
+SIGNATURE = ''
 
 class Programmer : 
 
@@ -57,8 +58,6 @@ class Programmer :
 		self.tty.flush()
 
 		self.tty.write(" H ")
-
-		# print self.tty.readline()
 
 		r='' # readline ?
 
