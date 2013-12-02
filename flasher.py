@@ -50,15 +50,14 @@ flasher.py can successfully
 
 """
 
+# on mac, use ls/dev/tty.usb* to find relevant port
 USBPORT = '/dev/tty.usbmodem1a1231'
 
-DEBUG = True
+DEBUG = False
 
-#PAGELEN = 264   /// per DataFlashSizes.h: DF_45DB161_PAGESIZE     528
-PAGELEN = 528
+PAGELEN = 528   # per DataFlashSizes.h: DF_45DB161_PAGESIZE     528
 
 TRAIL_CHAR = '\0'
-# SIGNATURE = 'YEAH'                # formatting fails with -- Error : unformatted flash (should start with YEAH)
 SIGNATURE = 'YIPY'
 
 class Programmer : 
@@ -71,7 +70,7 @@ class Programmer :
 
 		print self.tty.name
 
-		time.sleep(4.0) # this fails with 1.0, 2.0, sometimes 3.0 -- fixed by removing LED pulse
+		time.sleep(4.0) # this fails with 1.0, 2.0, sometimes 3.0
 		self.tty.flush()
 
 		self.tty.write(" H ")
@@ -81,7 +80,6 @@ class Programmer :
 		while r!='\n' : 
 			r=self.getch()                   
 			sys.stderr.write(r)
-		# print >>sys.stderr,"synced"
 		print "synced"
 		
 
@@ -101,13 +99,6 @@ class Programmer :
 			print repr(buf)
 			print "*** end print repr(buf) ***"
 		
-		# ORIGINAL CODE HERE
-		#s='W '+chr(pageid>>8)+chr(pageid&0xff)+' '+buf
-		#self.tty.write(s)
-
-		
-		# TROUBLESHOOTING CODE STARTS HERE --------------------
-
 		b = bytearray()
 
 		b.append('W')
@@ -125,25 +116,8 @@ class Programmer :
 			print hex_string
 			print "*** end print hex_string ***"
 
-		#self.tty.write(bytes(s))
-
-		#self.tty.write(writebytes)  # this command is accepted, but fails the desired data doesn't make it to the chip
-
-		#self.tty.write(hex_string)  # sending a hex string is not accepted... seems like it sends a string
-
-		#for b in writebytes:
-		#	self.tty.write(b)
-
-		#self.tty.write(bytes(writebytes))
-		#self.tty.write(writebytes)
-
-		#for b in writebytes: self.tty.write(b)   #FAIL
-
-		# CLUE: pySerial write does not accept bytearray!
-
 		import array
 		s = array.array('B',b).tostring()
-		#self.tty.write(s)
 
 		i=0
 		for c in s:
@@ -152,23 +126,22 @@ class Programmer :
 			i=i+1
 			self.tty.write(c)
 
-		print ""
-		print "*** write - begin print pageid"
-		print pageid
-		print "*** write - end print pageid"
-		print ""
-		print "*** write - begin print s"
-		print s
-		print 's[0]='+s[0]+'.'
-		print 's[1]='+s[1]+'.'
-		print 's[2]='+s[2]+'.'
-		print 's[3]='+s[3]+'.'
-		print 's[4]='+s[4]+'.'
-		print 's[5]='+s[5]+'...'
-		print "*** write - end print s"
+		if DEBUG:
+			print ""
+			print "*** write - begin print pageid"
+			print pageid
+			print "*** write - end print pageid"
+			print ""
+			print "*** write - begin print s"
+			print s
+			print 's[0]='+s[0]+'.'
+			print 's[1]='+s[1]+'.'
+			print 's[2]='+s[2]+'.'
+			print 's[3]='+s[3]+'.'
+			print 's[4]='+s[4]+'.'
+			print 's[5]='+s[5]+'...'
+			print "*** write - end print s"
 
-
-		# TROUBLESHOOTING CODE ENDS HERE --------------------
 
 		print >>sys.stderr,' ... ',
 		r=self.getch()
@@ -178,43 +151,34 @@ class Programmer :
 	def read_page(self,pageid) :
 		if DEBUG : 
 			print >>sys.stderr,'reading page',pageid,':',
-		#s='R '+chr(pageid>>8)+chr(pageid&0xff)+' ' # lets try to rewrite this as above
-		#self.tty.write(s)
 
 		# SIMILAR TO ABOVE, CONSTRUCT COMMAND ONE BYTE AT A TIME, CONFIRM SEND AS BYTE
 		b = bytearray()
 		b.append('R')
 		b.append(' ')
-		#b.append(chr(pageid>>8))
-		#b.append(chr(pageid&0xff))
 		b.append(chr((pageid>>8) + 48))		# this hack shifts it int value of digit to ascii equiv
 		b.append(chr((pageid&0xff) + 48))
 		b.append(' ')
 
-		#self.tty.write(bytes(s))
-		#self.tty.write(s)
-
 		import array
 		s = array.array('B',b).tostring()
 
-		# 12/30 debugging...
-		#s='R '+(pageid>>8)+(pageid&0xff)+' '
-
 		self.tty.write(s)
 
-		print ""
-		print "*** read - begin print pageid"
-		print pageid
-		print "*** read - end print pageid"
-		print ""
-		print "*** read - begin print s"
-		print s
-		print 's[0]='+s[0]+'.'
-		print 's[1]='+s[1]+'.'
-		print 's[2]='+s[2]+'.'
-		print 's[3]='+s[3]+'.'
-		print 's[4]='+s[4]+'.'
-		print "*** read - end print s"
+		if DEBUG:
+			print ""
+			print "*** read - begin print pageid"
+			print pageid
+			print "*** read - end print pageid"
+			print ""
+			print "*** read - begin print s"
+			print s
+			print 's[0]='+s[0]+'.'
+			print 's[1]='+s[1]+'.'
+			print 's[2]='+s[2]+'.'
+			print 's[3]='+s[3]+'.'
+			print 's[4]='+s[4]+'.'
+			print "*** read - end print s"
 
 		r=self.getch()
 		assert r=='$','expected $, got %s'%repr(r) # ok
