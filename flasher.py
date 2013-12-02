@@ -36,93 +36,16 @@ with last record = xx, xx, where xx is the 00.00 first free page.
 """
 cbonsig_notes
 
-25.nov.2013
-flasher.py initializes properly. attempts to format the flash fail as shown below:
+1.dec.2013
 
-Craigs-MacBook-Pro:2313goose cbonsignore$ python flasher.py format
-/dev/tty.usbmodem1d1131
-*Hello, this thing is working!
-synced
-Are you sure to erase chip ? [y/N]y
-writing table to chip
-writing page 0  ...  ok, done
-content table written successfully with 0 files
-reading content table from chip : 
-reading page 0 : done reading page:0
-Error : unformatted flash (should start with YEAH)
-(debug) Dump of the first sector : 
-...
+myflasher_github.ino is finally working as expected
+successfully writes and reads in debug mode and normal mode
 
-Changing SIGNATURE to something other than 'YEAH' has same outcome.
-Changing SIGNATURE to '' allows format to (appear to) succeed
-add_wav appears to be successful -- but after successfully transferring the file,
-it does not appear in the content table, nor does it appear when using ls. Sample output below:
-
-Craigs-MacBook-Pro:2313goose cbonsignore$ python flasher.py add_wav 1.wav 
-/dev/tty.usbmodem1d1131
-*Hello, this thing is working!
-synced
-1 channels
-1 byte width
-8000 samples per second
-reading page 0 : done reading page:0
-Adding  1.wav ...
-writing page 0  ...  ok, done
-Will write 20 pages
-writing page 1  ...  ok, done
-writing page 2  ...  ok, done
-writing page 3  ...  ok, done
-writing page 4  ...  ok, done
-writing page 5  ...  ok, done
-writing page 6  ...  ok, done
-writing page 7  ...  ok, done
-writing page 8  ...  ok, done
-writing page 9  ...  ok, done
-writing page 10  ...  ok, done
-writing page 11  ...  ok, done
-writing page 12  ...  ok, done
-writing page 13  ...  ok, done
-writing page 14  ...  ok, done
-writing page 15  ...  ok, done
-writing page 16  ...  ok, done
-writing page 17  ...  ok, done
-writing page 18  ...  ok, done
-writing page 19  ...  ok, done
-writing page 20  ...  ok, done
-writing page 21  ...  ok, done
-writing table to chip
-writing page 0  ...  ok, done
-content table written successfully with 1 files
-reading content table from chip : 
-reading page 0 : done reading page:0
-content table: [(0, 0)]
- -- content of chip : 
- --
- - next free page (over 2048) :  0  - 528 kbytes left
-reading page 0 : done reading page:0
-content table: [(0, 0)]
- -- content of chip : 
- --
- - next free page (over 2048) :  0  - 528 kbytes left
-Craigs-MacBook-Pro:2313goose cbonsignore$ python flasher.py ls
-/dev/tty.usbmodem1d1131
-*Hello, this thing is working!
-synced
-reading page 0 : done reading page:0
-content table: [(0, 0)]
- -- content of chip : 
- --
- - next free page (over 2048) :  0  - 528 kbytes left
-
-
-12/1 status
-* sketch_dec01a_dataflash.ino confirms that read and write work as intended
-* 32(E) chip responds with buffer size of 512. switched back to 16(D) chip and buffer responds as 528.
-* flasher.py modified to shift chr's and confirm that read and write commands are going to serial as intended
-* problem: write appears to work properly, read appears to work properly, BUT read != write.
-* page_read 7 confirms that previously written "hello world" can be read. but o in hello reads as /x00 (???)
-* signs point to myflasher_github.ino as culprit. review, compare with sketch_dec01a_dataflash.ino, find problems
-* issue is probably with write ... but read is suspicious because of strange 5th character
+flasher.py can successfully 
+* complete a format without signature failure
+* read a page, and return expected results
+* complete add_wav function with 1.wav (8-bit WAV)
+* report added file using ls
 
 
 """
@@ -148,7 +71,7 @@ class Programmer :
 
 		print self.tty.name
 
-		time.sleep(4.0) # this fails with 1.0, 2.0, sometimes 3.0
+		time.sleep(4.0) # this fails with 1.0, 2.0, sometimes 3.0 -- fixed by removing LED pulse
 		self.tty.flush()
 
 		self.tty.write(" H ")
@@ -189,8 +112,8 @@ class Programmer :
 
 		b.append('W')
 		b.append(' ')
-		b.append(chr((0>>8)+48))
-		b.append(chr((0&0xff)+48))
+		b.append(chr((pageid>>8)+48))
+		b.append(chr((pageid&0xff)+48))
 		b.append(' ')
 		for c in buf:
 			b.append(c)

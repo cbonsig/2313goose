@@ -19,7 +19,7 @@ DataFlash AT45DB161D <-----> Arduino Uno
 #include <SPI.h>
 #include "DataFlash.h"
 
-#define DEBUGMODE // this mode is for debugging, for interacting use with serial monitor only (not python)
+// #define DEBUGMODE // this mode is for debugging, for interacting use with serial monitor only (not python)
 
 #define PAGE_LEN DF_45DB161_PAGESIZE // 32(E) chip defaults to 512, not 528
 
