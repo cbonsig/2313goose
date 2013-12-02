@@ -14,52 +14,12 @@ DataFlash AT45DB161D <-----> Arduino Uno
 7 <--- white -----> GND  (GND)
 8 <--- red -------> 12   (MOSI)
 
-17.nov.2013
-
-set arduino serial terminal to "newline" mode
-
-confirmed that basic operation is correct
-  H + space (+ newline) = Hello, this thing is working!
-but flasher.py (as modified today) is still not working
-format command gives this result:
-
-$ python flasher.py format
-Hello, this thing is working!
-synced
-Are you sure to erase chip ? [y/N]y
-writing table to chip
-writing page 0  ...Traceback (most recent call last):
-  File "flasher.py", line 315, in <module>
-    p.format()
-  File "flasher.py", line 223, in format
-    self.write_table()
-  File "flasher.py", line 191, in write_table
-    self.write_page(0,buf+TRAIL_CHAR*(PAGELEN-len(buf)))
-  File "flasher.py", line 89, in write_page
-    assert r=='$','expected $, got %s'%repr(r) # ok
-AssertionError: expected $, got '#'
-
-can't find any combination of inputs in terminal that cause arduino to respond 
-with a $ (ok) response. only get !, #, *, or ? (or "Hello, this thing is working!")
-
-24.nov.2013
-
-attempt to port from "playground" dataflash library to github dataflash library
-arduino code seems to work as intended
-now getting $ response, looks all good
-
-problem now is with the python code, which now mysteriously
-fails to read characters back from serial
-(though it works fine in serial monitor, or direct tty session)
-
-next:
-try all this again when not tired (cycle power?)
-first try to get serialtest.py to work
-then fix flasher.py
-
 *****/
+
 #include <SPI.h>
 #include "DataFlash.h"
+
+#define DEBUGMODE // this mode is for debugging, for interacting use with serial monitor only (not python)
 
 #define LED_HB 9 // 13 is already taken by a pin !
 #define LED_W 6 // off
@@ -78,6 +38,11 @@ then fix flasher.py
 #define STK_NOSYNC5 '%'
 #define CRC_EOP ' ' 
 
+// dataflash pin settings
+static const int csPin    = 10;
+static const int resetPin = 6;
+static const int wpPin    = 7;
+
 DataFlash dataflash;
 uint8_t   loop_cnt;
 uint16_t  page;
@@ -94,8 +59,8 @@ void setup()
   delay(1000);
 
   /* Initialize DataFlash CS, Reset, WP */
-  dataflash.setup(10,6,7);
-     
+  dataflash.setup(csPin,resetPin,wpPin);
+  
   delay(10);
   
   dataflash.begin();
@@ -152,7 +117,7 @@ void loop(void) {
   }
 }
 
-
+// read a byte from serial line
 uint8_t getch() {
   while(!(Serial.available()>0));
   return (uint8_t) Serial.read();
@@ -176,56 +141,52 @@ void read_page() {
   // send an OK ('$')
   // print out the value of the buffer
 
+  // the "R" has been read already, so now we're expecting a CRC_EOP (space).
+  // if we get something else, throw an error
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}  // STK_NOSYNC  = '!'
-  //uint16_t page_id = ((uint16_t)getch()<<8) + getch();      // first char shifted left by 8 + next char
 
-  // old library wanted pageid in funky format; new library wants simple int (i think)
+  // now we're expecting two ASCII characters, representing a two digit page_id (with leading zero if <10)
   // get next two ASCII characters, and convert them to a uint16_t integar
   char buffer[2] = {getch(),getch()};
   uint16_t page_id = atoi(buffer);
 
+  // finally, we're expecting another CRC_EOP (space), so throw an error if we don't get one
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;} // STK_NOSYNC2  = '%'
   
   // debug: print the page_id if we get this far
-  // Serial.print(page_id,DEC);
-  // the command "R 10 " results in "12337" --- i think chars get converted in the Page_To_Buffer function
-  // with atoi() code above, this now returns the expected results
+  #ifdef DEBUGMODE
+  Serial.print(page_id,DEC);
+  #endif
 
-  // i think the code is hanging here ... we never get to the '$'
+  // send the requested page to buffer 2
   dataflash.pageToBuffer(page_id,2); 
-  // #FAIL on Page_To_Buffer ---- now this is fine
-
-
-  // send OK
-  // TEMP DEBUG 12/30
-  // Serial.print(page_id); //debug -- print page_id
-
+ 
+  // send STK_OK ($) to confirm a successful command
   Serial.print((char)STK_OK);                                        // STK_OK  = '$'
   
-  // send buffer
+  // send content of buffer 2 out on the serial line
   for (uint16_t i=0;i<PAGE_LEN;i++) {
-    dataflash.bufferRead(2,i);
-    //Serial.print((char) SPI.transfer(0xff));
-    
-    // TEMP DEBUG 11/30 confirms using human readable output that buffer looks correct
-    // uint8_t in_byte[1] = {SPI.transfer(0xff)};
-    // PrintHex8(in_byte,1);  // this successfully and clearly prints out each byte
 
-    // TEMP COMMENT OUT 11/30
+    // tell dataflash that we want to read a byte from buffer 2
+    dataflash.bufferRead(2,i);
+
+    #ifdef DEBUGMODE
+
+    // read a byte, send each byte to the serial line in human readable decimal format
+    //uint8_t in_byte[1] = {SPI.transfer(0xff)};
+    //PrintHex8(in_byte,1);  // this successfully and clearly prints out each byte
+    uint8_t in_byte = SPI.transfer(0xff);
+    Serial.print(".");
+    Serial.print(in_byte,DEC);
+
+    #else
+
+    // read a byte, and send it out on the serial line
     uint8_t in_byte = SPI.transfer(0xff);
     Serial.write(in_byte);  // use Serial.write instead of Serial.print for bytes
+
+    #endif
     
-    //Serial.print(in_byte); // use print for debugging
-
-    // PROBLEM as of 11/29
-    // Sending command "R 00 " repeatedly yields different results every time. WTF?
-    // There should be no change to the memory, so there's no reason for R 00 to be differnt.
-
-    // 11/30: I think I fixed this with bit masking in write_page
-
-    // 11/30: used atoi to make sure BlockoS is getting the pageID as an integer instead
-    //        of some weird char. confirmed wuth PrintHex8
-
     }  
 }
 
@@ -235,42 +196,44 @@ void write_page() {
   
   uint8_t c;
 
+  // after receiving a "W", we're expecting a CRC_EOP (space). if we don't get one, throw an error
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}  // STK_NOSYNC  = '!'
 
-  //unsigned int page_id = (getch()<<8) + getch();
-  //uint16_t page_id = (getch()<<8) + getch();
-
-  //same funky issue here with page_id
+  // the next two characters are ASCII characters representing the pageid (with leading 0 for pageid < 10)
+  // get the next two characters, and use atoi() to convert to an integar
   char buffer[2] = {getch(),getch()};
   uint16_t page_id = atoi(buffer);
   
+  // the next character should be a CRC_EOP (space). if not, throw an error
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;} // STK_NOSYNC2  = '%'
   
-  
-  // playground --- void Buffer_Write_Byte (unsigned char BufferNo, unsigned int IntPageAdr, unsigned char Data);
-  // github/BlokoS --- void bufferWrite(uint8_t bufferNum, uint16_t offset);
+  // github/BlockoS --- void bufferWrite(uint8_t bufferNum, uint16_t offset);
+  // from 0 to PAGE_LEN,
+  // pull the next character from serial
+  // set the location in buffer 1 for a buffer write
+  // and send the byte down SPI to the dataflash
 
   for (uint16_t i=0;i<PAGE_LEN;i++) {
     c = getch(); 
-    //dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
+    // dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
     dataflash.bufferWrite(1,i);
     SPI.transfer(c & 0xff); // lets try adding bit masking here, as seen in github dataflash example
+    // i don't understand this bit masking stuff
   }
   
-
-  // actually written page
-  //from playground --- void Buffer_To_Page (unsigned char BufferNo, unsigned int PageAdr);
-  //from github/BlokoS -- void bufferToPage(uint8_t bufferNum, uint16_t page);
-  //dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
+  // github/BlockoS -- void bufferToPage(uint8_t bufferNum, uint16_t page);
+  // send buffer 1 to the desired page
   dataflash.bufferToPage(1, page_id);
-  //pulse(LED_W,1); // too slow
 
+  // confirm a successful communication with STK_OK ($)
   Serial.print((char)STK_OK);                                        // STK_OK  = '$'
 
-  // TEMP DEBUG 11/30, confirming that read and write page values are as expected
-  // Serial.print((char)STK_OK);
-  // Serial.print(page_id); //debug -- print page_id  
-  // Serial.print((char)STK_OK);
+  #ifdef DEBUGMODE
+  // confirming that read and write page values are as expected
+  Serial.print((char)STK_OK);
+  Serial.print(page_id); //debug -- print page_id  
+  Serial.print((char)STK_OK);
+  #endif
 }
 
 
