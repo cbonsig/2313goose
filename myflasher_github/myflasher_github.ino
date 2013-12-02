@@ -21,9 +21,6 @@ DataFlash AT45DB161D <-----> Arduino Uno
 
 #define DEBUGMODE // this mode is for debugging, for interacting use with serial monitor only (not python)
 
-#define LED_HB 9 // 13 is already taken by a pin !
-#define LED_W 6 // off
-
 #define PAGE_LEN DF_45DB161_PAGESIZE // 32(E) chip defaults to 512, not 528
 
 // STK definitions
@@ -60,9 +57,6 @@ void setup()
 
   /* Initialize DataFlash CS, Reset, WP */
   dataflash.setup(csPin,resetPin,wpPin);
-  
-  delay(10);
-  
   dataflash.begin();
   
   /* Read status register */
@@ -75,43 +69,13 @@ void setup()
      
   analogReference(DEFAULT); // restore analog reference (to have 5V on it!)
   
-  // status LEDS  
-  pinMode(LED_HB, OUTPUT);
-  pinMode(LED_W, OUTPUT);
-  pulse(LED_HB, 2);
-  pulse(LED_W, 2);
-
   loop_cnt = 0;
   page     = 0;
 }
 
-// this provides a heartbeat on pin 9 (not 13 because already taken) , so you can tell the software is running.
-uint8_t hbval=128;
-int8_t hbdelta=8;
-void heartbeat() {
-  if (hbval > 192) hbdelta = -hbdelta;
-  if (hbval < 32) hbdelta = -hbdelta;
-  hbval += hbdelta;
-  analogWrite(LED_HB, hbval);
-  analogWrite(LED_W, 255-hbval);
-  delay(40);
-}
-
-#define PTIME 200
-void pulse(int pin, int times) {
-  do {
-    digitalWrite(pin, HIGH);
-    delay(PTIME);
-    digitalWrite(pin, LOW);
-    delay(PTIME);
-  } while (--times);
-
-}
-
-
 void loop(void) {
   // light the heartbeat LED
-  heartbeat();
+  // heartbeat();                // lets try getting rid of the heartbeat .. does this improve inconsistencies?
   if (Serial.available()) {
     flasher();
   }
@@ -213,13 +177,29 @@ void write_page() {
   // set the location in buffer 1 for a buffer write
   // and send the byte down SPI to the dataflash
 
+  #ifdef DEBUGMODE
+  uint8_t temp_storage[PAGE_LEN];
+  #endif
+  
   for (uint16_t i=0;i<PAGE_LEN;i++) {
     c = getch(); 
     // dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
     dataflash.bufferWrite(1,i);
     SPI.transfer(c & 0xff); // lets try adding bit masking here, as seen in github dataflash example
     // i don't understand this bit masking stuff
+
+    #ifdef DEBUGMODE
+    temp_storage[i] = c;
+    #endif
   }
+
+  #ifdef DEBUGMODE
+  for (uint16_t i=0;i<PAGE_LEN;i++) {
+    Serial.print(".");
+    Serial.print(temp_storage[i]);
+  }
+
+  #endif
   
   // github/BlockoS -- void bufferToPage(uint8_t bufferNum, uint16_t page);
   // send buffer 1 to the desired page
