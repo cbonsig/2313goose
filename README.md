@@ -7,4 +7,12 @@ More info about it on : http://s3-eu-west-1.amazonaws.com/makapufprojects/oie/do
 
 enjoy ! -- makapuf
 
+cbonsig fork
+============
+* revised Arduino code for compatibility with 1.0.5
+* ported to the Dataflash library by @BlockoS
+* revised Python to work with these changes
+* Python flasher + Arduino code confirmed to work using AT45DB161D, Python 2.7.5, Arduino 1.0.5, Mac OSX 10.9
+
+
 
