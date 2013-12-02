@@ -115,15 +115,28 @@ content table: [(0, 0)]
  - next free page (over 2048) :  0  - 528 kbytes left
 
 
+12/1 status
+* sketch_dec01a_dataflash.ino confirms that read and write work as intended
+* 32(E) chip responds with buffer size of 512. switched back to 16(D) chip and buffer responds as 528.
+* flasher.py modified to shift chr's and confirm that read and write commands are going to serial as intended
+* problem: write appears to work properly, read appears to work properly, BUT read != write.
+* page_read 7 confirms that previously written "hello world" can be read. but o in hello reads as /x00 (???)
+* signs point to myflasher_github.ino as culprit. review, compare with sketch_dec01a_dataflash.ino, find problems
+* issue is probably with write ... but read is suspicious because of strange 5th character
+
+
 """
 
+USBPORT = '/dev/tty.usbmodem1a1231'
 
 DEBUG = True
 
-PAGELEN = 264
+#PAGELEN = 264   /// per DataFlashSizes.h: DF_45DB161_PAGESIZE     528
+PAGELEN = 528
+
 TRAIL_CHAR = '\0'
 # SIGNATURE = 'YEAH'                # formatting fails with -- Error : unformatted flash (should start with YEAH)
-SIGNATURE = 'YEAH'
+SIGNATURE = 'YIPY'
 
 class Programmer : 
 
@@ -131,11 +144,11 @@ class Programmer :
 		
 		self.contenttable = [] # tuples (page_start,last_byte)
 
-		self.tty = serial.Serial('/dev/tty.usbmodem1d1131', 9600, timeout=1)
+		self.tty = serial.Serial(USBPORT, 9600, timeout=1)
 
 		print self.tty.name
 
-		time.sleep(4.0)
+		time.sleep(4.0) # this fails with 1.0, 2.0, sometimes 3.0
 		self.tty.flush()
 
 		self.tty.write(" H ")
@@ -158,23 +171,127 @@ class Programmer :
 
 	def write_page(self,pageid,buf) : 
 		assert len(buf) == PAGELEN,'wrong size:%d'%len(buf)
+
 		if DEBUG : 
 			print >>sys.stderr,'writing page %d'%pageid,
-		s='W '+chr(pageid>>8)+chr(pageid&0xff)+' '+buf
-		#print >>sys.stderr,'sending',repr(s)
-		self.tty.write(s)
+			print "*** begin print repr(buf) ***"
+			print repr(buf)
+			print "*** end print repr(buf) ***"
+		
+		# ORIGINAL CODE HERE
+		#s='W '+chr(pageid>>8)+chr(pageid&0xff)+' '+buf
+		#self.tty.write(s)
+
+		
+		# TROUBLESHOOTING CODE STARTS HERE --------------------
+
+		b = bytearray()
+
+		b.append('W')
+		b.append(' ')
+		b.append(chr((0>>8)+48))
+		b.append(chr((0&0xff)+48))
+		b.append(' ')
+		for c in buf:
+			b.append(c)
+
+
+		if DEBUG:
+			hex_string = "".join("\\x%02x" % j for j in b)
+			print "*** begin print hex_string ***"
+			print hex_string
+			print "*** end print hex_string ***"
+
+		#self.tty.write(bytes(s))
+
+		#self.tty.write(writebytes)  # this command is accepted, but fails the desired data doesn't make it to the chip
+
+		#self.tty.write(hex_string)  # sending a hex string is not accepted... seems like it sends a string
+
+		#for b in writebytes:
+		#	self.tty.write(b)
+
+		#self.tty.write(bytes(writebytes))
+		#self.tty.write(writebytes)
+
+		#for b in writebytes: self.tty.write(b)   #FAIL
+
+		# CLUE: pySerial write does not accept bytearray!
+
+		import array
+		s = array.array('B',b).tostring()
+		#self.tty.write(s)
+
+		i=0
+		for c in s:
+			if i<11:
+				print i,c
+			i=i+1
+			self.tty.write(c)
+
+		print ""
+		print "*** write - begin print pageid"
+		print pageid
+		print "*** write - end print pageid"
+		print ""
+		print "*** write - begin print s"
+		print s
+		print 's[0]='+s[0]+'.'
+		print 's[1]='+s[1]+'.'
+		print 's[2]='+s[2]+'.'
+		print 's[3]='+s[3]+'.'
+		print 's[4]='+s[4]+'.'
+		print 's[5]='+s[5]+'...'
+		print "*** write - end print s"
+
+
+		# TROUBLESHOOTING CODE ENDS HERE --------------------
+
 		print >>sys.stderr,' ... ',
 		r=self.getch()
 		assert r=='$','expected $, got %s'%repr(r) # ok
-		print >>sys.stderr,"ok, done"
+		print >>sys.stderr,"ok, done ... this worked"
 
 	def read_page(self,pageid) :
 		if DEBUG : 
 			print >>sys.stderr,'reading page',pageid,':',
-		s='R '+chr(pageid>>8)+chr(pageid&0xff)+' '
-		#print >>sys.stderr,'sending',repr(s)
+		#s='R '+chr(pageid>>8)+chr(pageid&0xff)+' ' # lets try to rewrite this as above
+		#self.tty.write(s)
+
+		# SIMILAR TO ABOVE, CONSTRUCT COMMAND ONE BYTE AT A TIME, CONFIRM SEND AS BYTE
+		b = bytearray()
+		b.append('R')
+		b.append(' ')
+		#b.append(chr(pageid>>8))
+		#b.append(chr(pageid&0xff))
+		b.append(chr((pageid>>8) + 48))		# this hack shifts it int value of digit to ascii equiv
+		b.append(chr((pageid&0xff) + 48))
+		b.append(' ')
+
+		#self.tty.write(bytes(s))
+		#self.tty.write(s)
+
+		import array
+		s = array.array('B',b).tostring()
+
+		# 12/30 debugging...
+		#s='R '+(pageid>>8)+(pageid&0xff)+' '
 
 		self.tty.write(s)
+
+		print ""
+		print "*** read - begin print pageid"
+		print pageid
+		print "*** read - end print pageid"
+		print ""
+		print "*** read - begin print s"
+		print s
+		print 's[0]='+s[0]+'.'
+		print 's[1]='+s[1]+'.'
+		print 's[2]='+s[2]+'.'
+		print 's[3]='+s[3]+'.'
+		print 's[4]='+s[4]+'.'
+		print "*** read - end print s"
 
 		r=self.getch()
 		assert r=='$','expected $, got %s'%repr(r) # ok
@@ -244,7 +361,7 @@ class Programmer :
 		"read content table from chip"
 		self.contenttable=[]
 		# read page zero 0
-		buf=self.read_page(0)
+		buf=self.read_page(0) 
 		#print >>sys.stderr,repr(buf)
 		if not buf.startswith(SIGNATURE) : 
 			print >>sys.stderr,'Error : unformatted flash (should start with %s)'%SIGNATURE
@@ -265,9 +382,20 @@ class Programmer :
 		# increasing test ?
 		# test offsets are zero except the last
 		print >>sys.stderr,"writing table to chip"
+
 		buf=SIGNATURE+''.join(chr(page>>8)+chr(page&0xff)+chr(offset>>8)+chr(offset&0xff) for page,offset in self.contenttable)
+		print "about to print buf"
+		print buf
+		print "done printing buf"
 		assert len(buf)<PAGELEN,'table too big to be written !'
-		self.write_page(0,buf+TRAIL_CHAR*(PAGELEN-len(buf)))
+
+		buf_to_write = buf+TRAIL_CHAR*(PAGELEN-len(buf))
+		print "about to print buf_to_write"
+		print buf_to_write
+		print "done printing buf_to_write"
+
+
+		self.write_page(0,buf_to_write)
 		print >>sys.stderr,'content table written successfully with %d files'%(len(self.contenttable)-1)
 		print >>sys.stderr,'reading content table from chip : '
 		self.ls()
@@ -381,7 +509,7 @@ def help() :
 	"""%sys.argv[0]
 if __name__=='__main__' :
 
-	p=Programmer('/dev/tty.usbmodem1a1231')
+	p=Programmer(USBPORT)
 
 	if len(sys.argv)==1 : 
 		help()

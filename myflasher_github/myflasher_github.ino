@@ -64,7 +64,7 @@ then fix flasher.py
 #define LED_HB 9 // 13 is already taken by a pin !
 #define LED_W 6 // off
 
-#define PAGE_LEN 264 
+#define PAGE_LEN DF_45DB161_PAGESIZE // 32(E) chip defaults to 512, not 528
 
 // STK definitions
 #define STK_OK '$'
@@ -177,27 +177,56 @@ void read_page() {
   // print out the value of the buffer
 
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}  // STK_NOSYNC  = '!'
-  uint16_t page_id = ((uint16_t)getch()<<8) + getch();      // first char shifted left by 8 + next char
+  //uint16_t page_id = ((uint16_t)getch()<<8) + getch();      // first char shifted left by 8 + next char
+
+  // old library wanted pageid in funky format; new library wants simple int (i think)
+  // get next two ASCII characters, and convert them to a uint16_t integar
+  char buffer[2] = {getch(),getch()};
+  uint16_t page_id = atoi(buffer);
 
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;} // STK_NOSYNC2  = '%'
   
   // debug: print the page_id if we get this far
-  // Serial.print(page_id);
+  // Serial.print(page_id,DEC);
   // the command "R 10 " results in "12337" --- i think chars get converted in the Page_To_Buffer function
+  // with atoi() code above, this now returns the expected results
 
   // i think the code is hanging here ... we never get to the '$'
   dataflash.pageToBuffer(page_id,2); 
-  // #FAIL on Page_To_Buffer
+  // #FAIL on Page_To_Buffer ---- now this is fine
 
 
   // send OK
+  // TEMP DEBUG 12/30
+  // Serial.print(page_id); //debug -- print page_id
+
   Serial.print((char)STK_OK);                                        // STK_OK  = '$'
   
   // send buffer
   for (uint16_t i=0;i<PAGE_LEN;i++) {
     dataflash.bufferRead(2,i);
-    Serial.print((char) SPI.transfer(0xff));
-  }  
+    //Serial.print((char) SPI.transfer(0xff));
+    
+    // TEMP DEBUG 11/30 confirms using human readable output that buffer looks correct
+    // uint8_t in_byte[1] = {SPI.transfer(0xff)};
+    // PrintHex8(in_byte,1);  // this successfully and clearly prints out each byte
+
+    // TEMP COMMENT OUT 11/30
+    uint8_t in_byte = SPI.transfer(0xff);
+    Serial.write(in_byte);  // use Serial.write instead of Serial.print for bytes
+    
+    //Serial.print(in_byte); // use print for debugging
+
+    // PROBLEM as of 11/29
+    // Sending command "R 00 " repeatedly yields different results every time. WTF?
+    // There should be no change to the memory, so there's no reason for R 00 to be differnt.
+
+    // 11/30: I think I fixed this with bit masking in write_page
+
+    // 11/30: used atoi to make sure BlockoS is getting the pageID as an integer instead
+    //        of some weird char. confirmed wuth PrintHex8
+
+    }  
 }
 
 
@@ -208,24 +237,40 @@ void write_page() {
 
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}  // STK_NOSYNC  = '!'
 
-  unsigned int page_id = (getch()<<8) + getch();
+  //unsigned int page_id = (getch()<<8) + getch();
+  //uint16_t page_id = (getch()<<8) + getch();
+
+  //same funky issue here with page_id
+  char buffer[2] = {getch(),getch()};
+  uint16_t page_id = atoi(buffer);
   
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;} // STK_NOSYNC2  = '%'
   
-  for (unsigned int i=0;i<PAGE_LEN;i++) {
+  
+  // playground --- void Buffer_Write_Byte (unsigned char BufferNo, unsigned int IntPageAdr, unsigned char Data);
+  // github/BlokoS --- void bufferWrite(uint8_t bufferNum, uint16_t offset);
+
+  for (uint16_t i=0;i<PAGE_LEN;i++) {
     c = getch(); 
     //dflash.Buffer_Write_Byte(1,i,c);  //write to buffer 1, 1 byte at a time
     dataflash.bufferWrite(1,i);
-    SPI.transfer(c);
+    SPI.transfer(c & 0xff); // lets try adding bit masking here, as seen in github dataflash example
   }
   
 
   // actually written page
+  //from playground --- void Buffer_To_Page (unsigned char BufferNo, unsigned int PageAdr);
+  //from github/BlokoS -- void bufferToPage(uint8_t bufferNum, uint16_t page);
   //dflash.Buffer_To_Page(1, page_id); //write the buffer to the memory on page: here
   dataflash.bufferToPage(1, page_id);
   //pulse(LED_W,1); // too slow
 
   Serial.print((char)STK_OK);                                        // STK_OK  = '$'
+
+  // TEMP DEBUG 11/30, confirming that read and write page values are as expected
+  // Serial.print((char)STK_OK);
+  // Serial.print(page_id); //debug -- print page_id  
+  // Serial.print((char)STK_OK);
 }
 
 
@@ -267,4 +312,30 @@ int flasher() {
   }
 }
 
+/*
+  PrintHex routines for Arduino: to print byte or word data in hex with
+  leading zeroes.
+  Copyright (C) 2010 Kairama Inc
 
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+void PrintHex8(uint8_t *data, uint8_t length) // prints 8-bit data in hex with leading zeroes
+{
+        Serial.print("0x"); 
+        for (int i=0; i<length; i++) { 
+          if (data[i]<0x10) {Serial.print("0");} 
+          Serial.print(data[i],HEX); 
+          Serial.print(" "); 
+        }
+}
