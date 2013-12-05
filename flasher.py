@@ -47,13 +47,20 @@ flasher.py can successfully
 * complete add_wav function with 1.wav (8-bit WAV)
 * report added file using ls
 
+2.dec.2013
+fails for content exceeding 99 pages because of flawed
+ascii character implementation. need to revert python and arduino
+code to represent pageid as two bytes as originally designed.
+
+4.dec.2013
+reverted from ascii shift to original scheme for read/write page address
 
 """
 
 # on mac, use ls/dev/tty.usb* to find relevant port
 USBPORT = '/dev/tty.usbmodem1a1231'
 
-DEBUG = False
+DEBUG = True
 
 PAGELEN = 528   # per DataFlashSizes.h: DF_45DB161_PAGESIZE     528
 
@@ -95,16 +102,13 @@ class Programmer :
 
 		if DEBUG : 
 			print >>sys.stderr,'writing page %d'%pageid,
-			print "*** begin print repr(buf) ***"
-			print repr(buf)
-			print "*** end print repr(buf) ***"
 		
 		b = bytearray()
 
 		b.append('W')
 		b.append(' ')
-		b.append(chr((pageid>>8)+48))
-		b.append(chr((pageid&0xff)+48))
+		b.append(chr(pageid>>8))
+		b.append(chr(pageid&0xff))
 		b.append(' ')
 		for c in buf:
 			b.append(c)
@@ -119,34 +123,13 @@ class Programmer :
 		import array
 		s = array.array('B',b).tostring()
 
-		i=0
 		for c in s:
-			if i<11:
-				print i,c
-			i=i+1
 			self.tty.write(c)
-
-		if DEBUG:
-			print ""
-			print "*** write - begin print pageid"
-			print pageid
-			print "*** write - end print pageid"
-			print ""
-			print "*** write - begin print s"
-			print s
-			print 's[0]='+s[0]+'.'
-			print 's[1]='+s[1]+'.'
-			print 's[2]='+s[2]+'.'
-			print 's[3]='+s[3]+'.'
-			print 's[4]='+s[4]+'.'
-			print 's[5]='+s[5]+'...'
-			print "*** write - end print s"
-
 
 		print >>sys.stderr,' ... ',
 		r=self.getch()
 		assert r=='$','expected $, got %s'%repr(r) # ok
-		print >>sys.stderr,"ok, done ... this worked"
+		print >>sys.stderr,"ok, done ... "
 
 	def read_page(self,pageid) :
 		if DEBUG : 
@@ -156,29 +139,14 @@ class Programmer :
 		b = bytearray()
 		b.append('R')
 		b.append(' ')
-		b.append(chr((pageid>>8) + 48))		# this hack shifts it int value of digit to ascii equiv
-		b.append(chr((pageid&0xff) + 48))
+		b.append(chr(pageid>>8))		# this hack shifts it int value of digit to ascii equiv
+		b.append(chr(pageid&0xff))
 		b.append(' ')
 
 		import array
 		s = array.array('B',b).tostring()
 
 		self.tty.write(s)
-
-		if DEBUG:
-			print ""
-			print "*** read - begin print pageid"
-			print pageid
-			print "*** read - end print pageid"
-			print ""
-			print "*** read - begin print s"
-			print s
-			print 's[0]='+s[0]+'.'
-			print 's[1]='+s[1]+'.'
-			print 's[2]='+s[2]+'.'
-			print 's[3]='+s[3]+'.'
-			print 's[4]='+s[4]+'.'
-			print "*** read - end print s"
 
 		r=self.getch()
 		assert r=='$','expected $, got %s'%repr(r) # ok

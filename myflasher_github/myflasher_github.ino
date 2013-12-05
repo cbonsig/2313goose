@@ -2,7 +2,7 @@
 myflasher_github.ino
 
 based on https://github.com/makapuf/2313goose
-with dataflash.c from Arduino playground http://playground.arduino.cc/Code/Dataflash
+with Dataflash library from https://github.com/BlockoS/arduino-dataflash
 
 DataFlash AT45DB161D <-----> Arduino Uno
 1 <--- black -----> 11   (MISO)
@@ -21,7 +21,7 @@ DataFlash AT45DB161D <-----> Arduino Uno
 
 // #define DEBUGMODE // this mode is for debugging, for interacting use with serial monitor only (not python)
 
-#define PAGE_LEN DF_45DB161_PAGESIZE // 32(E) chip defaults to 512, not 528
+#define PAGE_LEN DF_45DB161_PAGESIZE // my 32(E) chip is factory-set for 512, not 528
 
 // STK definitions
 #define STK_OK '$'
@@ -109,10 +109,8 @@ void read_page() {
   // if we get something else, throw an error
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return;}  // STK_NOSYNC  = '!'
 
-  // now we're expecting two ASCII characters, representing a two digit page_id (with leading zero if <10)
-  // get next two ASCII characters, and convert them to a uint16_t integar
-  char buffer[2] = {getch(),getch()};
-  uint16_t page_id = atoi(buffer);
+  // page_id: first character is high portion of address; second character is low portion of address
+  uint16_t page_id = ((uint16_t)getch()<<8) + getch();
 
   // finally, we're expecting another CRC_EOP (space), so throw an error if we don't get one
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return;} // STK_NOSYNC2  = '%'
@@ -162,13 +160,10 @@ void write_page() {
 
   // after receiving a "W", we're expecting a CRC_EOP (space). if we don't get one, throw an error
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC); return ;}  // STK_NOSYNC  = '!'
+  // page_id: first character is high portion of address; second character is low portion of address
+  uint16_t page_id = ((uint16_t)getch()<<8) + getch();
 
-  // the next two characters are ASCII characters representing the pageid (with leading 0 for pageid < 10)
-  // get the next two characters, and use atoi() to convert to an integar
-  char buffer[2] = {getch(),getch()};
-  uint16_t page_id = atoi(buffer);
-  
-  // the next character should be a CRC_EOP (space). if not, throw an error
+   // the next character should be a CRC_EOP (space). if not, throw an error
   if (getch()!=CRC_EOP) { Serial.print((char)STK_NOSYNC2); return ;} // STK_NOSYNC2  = '%'
   
   // github/BlockoS --- void bufferWrite(uint8_t bufferNum, uint16_t offset);
