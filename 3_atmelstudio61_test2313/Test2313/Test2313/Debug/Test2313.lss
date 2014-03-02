@@ -1,0 +1,1043 @@
+
+Test2313.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000004c6  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000004  00800060  000004c6  0000055a  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000004  00800064  00800064  0000055e  2**0
+                  ALLOC
+  3 .stab         000006b4  00000000  00000000  00000560  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  4 .stabstr      00000097  00000000  00000000  00000c14  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .comment      0000002f  00000000  00000000  00000cab  2**0
+                  CONTENTS, READONLY
+  6 .debug_aranges 000000c0  00000000  00000000  00000cda  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_info   00000925  00000000  00000000  00000d9a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_abbrev 000004c0  00000000  00000000  000016bf  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_line   00000453  00000000  00000000  00001b7f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_frame  000001e0  00000000  00000000  00001fd4  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_str    000002ae  00000000  00000000  000021b4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_loc    000005d4  00000000  00000000  00002462  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 13 .debug_ranges 00000100  00000000  00000000  00002a36  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	12 c0       	rjmp	.+36     	; 0x26 <__ctors_end>
+   2:	2a c0       	rjmp	.+84     	; 0x58 <__bad_interrupt>
+   4:	29 c0       	rjmp	.+82     	; 0x58 <__bad_interrupt>
+   6:	28 c0       	rjmp	.+80     	; 0x58 <__bad_interrupt>
+   8:	f3 c0       	rjmp	.+486    	; 0x1f0 <__vector_4>
+   a:	26 c0       	rjmp	.+76     	; 0x58 <__bad_interrupt>
+   c:	25 c0       	rjmp	.+74     	; 0x58 <__bad_interrupt>
+   e:	24 c0       	rjmp	.+72     	; 0x58 <__bad_interrupt>
+  10:	23 c0       	rjmp	.+70     	; 0x58 <__bad_interrupt>
+  12:	22 c0       	rjmp	.+68     	; 0x58 <__bad_interrupt>
+  14:	21 c0       	rjmp	.+66     	; 0x58 <__bad_interrupt>
+  16:	20 c0       	rjmp	.+64     	; 0x58 <__bad_interrupt>
+  18:	1f c0       	rjmp	.+62     	; 0x58 <__bad_interrupt>
+  1a:	1e c0       	rjmp	.+60     	; 0x58 <__bad_interrupt>
+  1c:	1d c0       	rjmp	.+58     	; 0x58 <__bad_interrupt>
+  1e:	1c c0       	rjmp	.+56     	; 0x58 <__bad_interrupt>
+  20:	1b c0       	rjmp	.+54     	; 0x58 <__bad_interrupt>
+  22:	1a c0       	rjmp	.+52     	; 0x58 <__bad_interrupt>
+  24:	19 c0       	rjmp	.+50     	; 0x58 <__bad_interrupt>
+
+00000026 <__ctors_end>:
+  26:	11 24       	eor	r1, r1
+  28:	1f be       	out	0x3f, r1	; 63
+  2a:	cf ed       	ldi	r28, 0xDF	; 223
+  2c:	cd bf       	out	0x3d, r28	; 61
+
+0000002e <__do_clear_bss>:
+  2e:	20 e0       	ldi	r18, 0x00	; 0
+  30:	a4 e6       	ldi	r26, 0x64	; 100
+  32:	b0 e0       	ldi	r27, 0x00	; 0
+  34:	01 c0       	rjmp	.+2      	; 0x38 <.do_clear_bss_start>
+
+00000036 <.do_clear_bss_loop>:
+  36:	1d 92       	st	X+, r1
+
+00000038 <.do_clear_bss_start>:
+  38:	a8 36       	cpi	r26, 0x68	; 104
+  3a:	b2 07       	cpc	r27, r18
+  3c:	e1 f7       	brne	.-8      	; 0x36 <.do_clear_bss_loop>
+
+0000003e <__do_copy_data>:
+  3e:	10 e0       	ldi	r17, 0x00	; 0
+  40:	a0 e6       	ldi	r26, 0x60	; 96
+  42:	b0 e0       	ldi	r27, 0x00	; 0
+  44:	e6 ec       	ldi	r30, 0xC6	; 198
+  46:	f4 e0       	ldi	r31, 0x04	; 4
+  48:	02 c0       	rjmp	.+4      	; 0x4e <__SREG__+0xf>
+  4a:	05 90       	lpm	r0, Z+
+  4c:	0d 92       	st	X+, r0
+  4e:	a4 36       	cpi	r26, 0x64	; 100
+  50:	b1 07       	cpc	r27, r17
+  52:	d9 f7       	brne	.-10     	; 0x4a <__SREG__+0xb>
+  54:	68 d1       	rcall	.+720    	; 0x326 <main>
+  56:	35 c2       	rjmp	.+1130   	; 0x4c2 <_exit>
+
+00000058 <__bad_interrupt>:
+  58:	d3 cf       	rjmp	.-90     	; 0x0 <__vectors>
+
+0000005a <spi_transfer>:
+
+// data SPI via http://playground.arduino.cc/Code/USI-SPI + dataflash info (simple modes : streaming read)
+
+static uint8_t spi_transfer(uint8_t data) 
+{
+  USIDR = data;
+  5a:	8f b9       	out	0x0f, r24	; 15
+  USISR = _BV(USIOIF); // clear flag
+  5c:	80 e4       	ldi	r24, 0x40	; 64
+  5e:	8e b9       	out	0x0e, r24	; 14
+ 
+  while ( (USISR & _BV(USIOIF)) == 0 ) {
+  60:	76 99       	sbic	0x0e, 6	; 14
+  62:	04 c0       	rjmp	.+8      	; 0x6c <spi_transfer+0x12>
+   USICR = (1<<USIWM0)|(1<<USICS1)|(1<<USICLK)|(1<<USITC);
+  64:	8b e1       	ldi	r24, 0x1B	; 27
+  66:	8d b9       	out	0x0d, r24	; 13
+static uint8_t spi_transfer(uint8_t data) 
+{
+  USIDR = data;
+  USISR = _BV(USIOIF); // clear flag
+ 
+  while ( (USISR & _BV(USIOIF)) == 0 ) {
+  68:	76 9b       	sbis	0x0e, 6	; 14
+  6a:	fd cf       	rjmp	.-6      	; 0x66 <spi_transfer+0xc>
+   USICR = (1<<USIWM0)|(1<<USICS1)|(1<<USICLK)|(1<<USITC);
+  }
+  return USIDR;
+  6c:	8f b1       	in	r24, 0x0f	; 15
+}
+  6e:	08 95       	ret
+
+00000070 <setup_io>:
+}
+
+// ------------------------------------------------
+void setup_io()
+{
+    DDRB |= _BV(SPEAKER_PIN);
+  70:	ba 9a       	sbi	0x17, 2	; 23
+    
+    DDRD |= _BV(LED_PIN);
+  72:	89 9a       	sbi	0x11, 1	; 17
+    PORTD |= _BV(LED_PIN); // set it on
+  74:	91 9a       	sbi	0x12, 1	; 18
+
+    DDRD &= ~(_BV(BUTTON_PIN)); // input
+  76:	8a 98       	cbi	0x11, 2	; 17
+    PORTD |= _BV(BUTTON_PIN); // pullup 
+  78:	92 9a       	sbi	0x12, 2	; 18
+  7a:	08 95       	ret
+
+0000007c <setup>:
+}
+
+static void setup_usi_spi()
+{
+    // DON'T use the MOSI/MISO pins. They're for ISP programming only!
+    DDRB |= _BV(PB4); // as output (latch)
+  7c:	bc 9a       	sbi	0x17, 4	; 23
+    DDRB |= _BV(PB6); // as output (DO) - data out
+  7e:	be 9a       	sbi	0x17, 6	; 23
+    DDRB |= _BV(PB7); // as output (USISCK) - clock
+  80:	bf 9a       	sbi	0x17, 7	; 23
+    DDRB &= ~_BV(PB5); // as input (DI) - data in
+  82:	bd 98       	cbi	0x17, 5	; 23
+    PORTB |= _BV(PB5); // pullup on (DI)
+  84:	c5 9a       	sbi	0x18, 5	; 24
+}
+
+static void dataflash_flash2buf1(uint16_t page_id)
+{
+    // read page X to buffer 1
+    HIGH_CS;
+  86:	c4 9a       	sbi	0x18, 4	; 24
+    LOW_CS;
+  88:	c4 98       	cbi	0x18, 4	; 24
+    spi_transfer(0x53); // READ TO BUF 1, 55 to BUF2,4b reserved, 11=4+7b addr, 9=1+8b dont care
+  8a:	83 e5       	ldi	r24, 0x53	; 83
+  8c:	e6 df       	rcall	.-52     	; 0x5a <spi_transfer>
+    spi_transfer((page_id>>7)&0xf); // 4b x+hi 4b 
+  8e:	80 e0       	ldi	r24, 0x00	; 0
+  90:	e4 df       	rcall	.-56     	; 0x5a <spi_transfer>
+    spi_transfer((page_id&0x7f)<<1); // low 7b pg id+1b x
+  92:	80 e0       	ldi	r24, 0x00	; 0
+  94:	e2 df       	rcall	.-60     	; 0x5a <spi_transfer>
+    spi_transfer(0); // 8b dont care
+  96:	80 e0       	ldi	r24, 0x00	; 0
+  98:	e0 df       	rcall	.-64     	; 0x5a <spi_transfer>
+    HIGH_CS; // start_transfer
+  9a:	c4 9a       	sbi	0x18, 4	; 24
+void setup()
+{
+	setup_usi_spi();
+    // load FAT to dataflash buffer 
+    dataflash_flash2buf1(0);
+    setup_io();
+  9c:	e9 df       	rcall	.-46     	; 0x70 <setup_io>
+    sounddata_length=0;
+  9e:	10 92 65 00 	sts	0x0065, r1
+  a2:	10 92 64 00 	sts	0x0064, r1
+  a6:	08 95       	ret
+
+000000a8 <play_nowait>:
+        sample = dataflash_arrayread_read(); // read next sample
+    }
+}
+
+void play_nowait(uint8_t sample_id)
+{
+  a8:	ef 92       	push	r14
+  aa:	ff 92       	push	r15
+  ac:	0f 93       	push	r16
+  ae:	1f 93       	push	r17
+  b0:	cf 93       	push	r28
+  b2:	df 93       	push	r29
+  b4:	cd b7       	in	r28, 0x3d	; 61
+  b6:	dd 27       	eor	r29, r29
+  b8:	c6 50       	subi	r28, 0x06	; 6
+  ba:	cd bf       	out	0x3d, r28	; 61
+            HiLastBytes,LoLastBytes
+        ) avec dernier record = xx,xx,00,00 où xx est la premiere page libre.
+
+    */
+
+    dataflash_readbuf1(4+4*(uint16_t)sample_id,6,datafat); // sample id is at position 4
+  bc:	08 2f       	mov	r16, r24
+  be:	10 e0       	ldi	r17, 0x00	; 0
+  c0:	0f 5f       	subi	r16, 0xFF	; 255
+  c2:	1f 4f       	sbci	r17, 0xFF	; 255
+  c4:	00 0f       	add	r16, r16
+  c6:	11 1f       	adc	r17, r17
+  c8:	00 0f       	add	r16, r16
+  ca:	11 1f       	adc	r17, r17
+
+
+static void dataflash_readbuf1(uint16_t offset, uint8_t nb, char *buf)
+{
+    // read page X to buffer 1
+    HIGH_CS;
+  cc:	c4 9a       	sbi	0x18, 4	; 24
+    LOW_CS;
+  ce:	c4 98       	cbi	0x18, 4	; 24
+    spi_transfer(0xD1); // READ TO BUF 1, 15b dont care,  9b addr, 8b dont care
+  d0:	81 ed       	ldi	r24, 0xD1	; 209
+  d2:	c3 df       	rcall	.-122    	; 0x5a <spi_transfer>
+    spi_transfer(0); // 8b dont care
+  d4:	80 e0       	ldi	r24, 0x00	; 0
+  d6:	c1 df       	rcall	.-126    	; 0x5a <spi_transfer>
+    spi_transfer((offset>>8)&1); // 7b dont care+1b pageid
+  d8:	81 2f       	mov	r24, r17
+  da:	81 70       	andi	r24, 0x01	; 1
+  dc:	be df       	rcall	.-132    	; 0x5a <spi_transfer>
+    spi_transfer(offset & 0xff); // low 8b pg id
+  de:	80 2f       	mov	r24, r16
+  e0:	bc df       	rcall	.-136    	; 0x5a <spi_transfer>
+  e2:	8e 01       	movw	r16, r28
+  e4:	0f 5f       	subi	r16, 0xFF	; 255
+  e6:	1f 4f       	sbci	r17, 0xFF	; 255
+        // load next sample
+        sample = dataflash_arrayread_read(); // read next sample
+    }
+}
+
+void play_nowait(uint8_t sample_id)
+  e8:	7e 01       	movw	r14, r28
+  ea:	47 e0       	ldi	r20, 0x07	; 7
+  ec:	e4 0e       	add	r14, r20
+  ee:	f1 1c       	adc	r15, r1
+    spi_transfer(0); // 8b dont care
+    spi_transfer((offset>>8)&1); // 7b dont care+1b pageid
+    spi_transfer(offset & 0xff); // low 8b pg id
+
+    for (int i=0;i<nb;i++)
+        *buf++ = spi_transfer(0x55); // read bytes
+  f0:	85 e5       	ldi	r24, 0x55	; 85
+  f2:	b3 df       	rcall	.-154    	; 0x5a <spi_transfer>
+  f4:	f8 01       	movw	r30, r16
+  f6:	81 93       	st	Z+, r24
+  f8:	8f 01       	movw	r16, r30
+    spi_transfer(0xD1); // READ TO BUF 1, 15b dont care,  9b addr, 8b dont care
+    spi_transfer(0); // 8b dont care
+    spi_transfer((offset>>8)&1); // 7b dont care+1b pageid
+    spi_transfer(offset & 0xff); // low 8b pg id
+
+    for (int i=0;i<nb;i++)
+  fa:	ee 15       	cp	r30, r14
+  fc:	ff 05       	cpc	r31, r15
+  fe:	c1 f7       	brne	.-16     	; 0xf0 <__stack+0x11>
+        *buf++ = spi_transfer(0x55); // read bytes
+    HIGH_CS;
+ 100:	c4 9a       	sbi	0x18, 4	; 24
+
+    */
+
+    dataflash_readbuf1(4+4*(uint16_t)sample_id,6,datafat); // sample id is at position 4
+
+    p1 =(datafat[0]<<8)+datafat[1];
+ 102:	99 81       	ldd	r25, Y+1	; 0x01
+ 104:	80 e0       	ldi	r24, 0x00	; 0
+ 106:	2a 81       	ldd	r18, Y+2	; 0x02
+ 108:	8c 01       	movw	r16, r24
+ 10a:	02 0f       	add	r16, r18
+ 10c:	11 1d       	adc	r17, r1
+    ofs=(datafat[2]<<8)+datafat[3];
+ 10e:	3b 81       	ldd	r19, Y+3	; 0x03
+ 110:	20 e0       	ldi	r18, 0x00	; 0
+ 112:	8c 81       	ldd	r24, Y+4	; 0x04
+ 114:	28 0f       	add	r18, r24
+ 116:	31 1d       	adc	r19, r1
+    p2 =(datafat[4]<<8)+datafat[5];
+
+    sounddata_length = (p2-p1-2)*PAGE_LENGTH+ofs;
+ 118:	f9 01       	movw	r30, r18
+ 11a:	e0 51       	subi	r30, 0x10	; 16
+ 11c:	f2 40       	sbci	r31, 0x02	; 2
+
+    dataflash_readbuf1(4+4*(uint16_t)sample_id,6,datafat); // sample id is at position 4
+
+    p1 =(datafat[0]<<8)+datafat[1];
+    ofs=(datafat[2]<<8)+datafat[3];
+    p2 =(datafat[4]<<8)+datafat[5];
+ 11e:	3d 81       	ldd	r19, Y+5	; 0x05
+ 120:	20 e0       	ldi	r18, 0x00	; 0
+ 122:	8e 81       	ldd	r24, Y+6	; 0x06
+ 124:	a9 01       	movw	r20, r18
+ 126:	48 0f       	add	r20, r24
+ 128:	51 1d       	adc	r21, r1
+ 12a:	ca 01       	movw	r24, r20
+
+    sounddata_length = (p2-p1-2)*PAGE_LENGTH+ofs;
+ 12c:	80 1b       	sub	r24, r16
+ 12e:	91 0b       	sbc	r25, r17
+ 130:	68 e0       	ldi	r22, 0x08	; 8
+ 132:	71 e0       	ldi	r23, 0x01	; 1
+ 134:	fe d0       	rcall	.+508    	; 0x332 <__mulhi3>
+ 136:	8e 0f       	add	r24, r30
+ 138:	9f 1f       	adc	r25, r31
+ 13a:	90 93 65 00 	sts	0x0065, r25
+ 13e:	80 93 64 00 	sts	0x0064, r24
+
+    // issue read continuous value from page X
+    //dataflash_arrayread_setup(datafat[0]+1); // 1 page for filename, then file data
+    dataflash_arrayread_setup(p1+1); // 1 page for filename, then file data
+ 142:	0f 5f       	subi	r16, 0xFF	; 255
+ 144:	1f 4f       	sbci	r17, 0xFF	; 255
+}
+
+static void dataflash_arrayread_setup(uint16_t page_id)
+/* alwayts starts at the beginning of a page */
+{
+    HIGH_CS;
+ 146:	c4 9a       	sbi	0x18, 4	; 24
+    LOW_CS;
+ 148:	c4 98       	cbi	0x18, 4	; 24
+    spi_transfer(0xE8); // 24 bits address + 32 bits dont care 
+ 14a:	88 ee       	ldi	r24, 0xE8	; 232
+ 14c:	86 df       	rcall	.-244    	; 0x5a <spi_transfer>
+    spi_transfer((page_id>>7)&0xf); // page_id is 11 bits
+ 14e:	c8 01       	movw	r24, r16
+ 150:	88 0f       	add	r24, r24
+ 152:	89 2f       	mov	r24, r25
+ 154:	88 1f       	adc	r24, r24
+ 156:	99 0b       	sbc	r25, r25
+ 158:	91 95       	neg	r25
+ 15a:	8f 70       	andi	r24, 0x0F	; 15
+ 15c:	7e df       	rcall	.-260    	; 0x5a <spi_transfer>
+    spi_transfer((page_id&0x7f)<<1); // page_id is 11 bits
+ 15e:	80 2f       	mov	r24, r16
+ 160:	88 0f       	add	r24, r24
+ 162:	7b df       	rcall	.-266    	; 0x5a <spi_transfer>
+    spi_transfer(0); // low bits = 0 since offset is zero
+ 164:	80 e0       	ldi	r24, 0x00	; 0
+ 166:	79 df       	rcall	.-270    	; 0x5a <spi_transfer>
+
+    spi_transfer(0); // dont care
+ 168:	80 e0       	ldi	r24, 0x00	; 0
+ 16a:	77 df       	rcall	.-274    	; 0x5a <spi_transfer>
+    spi_transfer(0); // dont care
+ 16c:	80 e0       	ldi	r24, 0x00	; 0
+ 16e:	75 df       	rcall	.-278    	; 0x5a <spi_transfer>
+    spi_transfer(0); // dont care
+ 170:	80 e0       	ldi	r24, 0x00	; 0
+ 172:	73 df       	rcall	.-282    	; 0x5a <spi_transfer>
+    spi_transfer(0); // dont care
+ 174:	80 e0       	ldi	r24, 0x00	; 0
+ 176:	71 df       	rcall	.-286    	; 0x5a <spi_transfer>
+    // on the speaker pin 0c0A, ie PB2, ie pin14
+
+    // Use internal clock @ 8MHz - so don't change cksel. Also must remove 8MHz fuse.
+
+    // Set fast PWM mode on TIMER0
+    TCCR0A |= _BV(WGM00) | _BV(WGM01);
+ 178:	80 b7       	in	r24, 0x30	; 48
+ 17a:	83 60       	ori	r24, 0x03	; 3
+ 17c:	80 bf       	out	0x30, r24	; 48
+    TCCR0A &= ~_BV(WGM02);
+ 17e:	80 b7       	in	r24, 0x30	; 48
+ 180:	87 7f       	andi	r24, 0xF7	; 247
+ 182:	80 bf       	out	0x30, r24	; 48
+
+    /* Clear 0C0A on compare. */
+    TCCR0A |= _BV(COM0A1);
+ 184:	80 b7       	in	r24, 0x30	; 48
+ 186:	80 68       	ori	r24, 0x80	; 128
+ 188:	80 bf       	out	0x30, r24	; 48
+    TCCR0A &= ~_BV(COM0A0);
+ 18a:	80 b7       	in	r24, 0x30	; 48
+ 18c:	8f 7b       	andi	r24, 0xBF	; 191
+ 18e:	80 bf       	out	0x30, r24	; 48
+
+    /* Start timer, no prescaling. */
+    TCCR0B = _BV(CS00);
+ 190:	81 e0       	ldi	r24, 0x01	; 1
+ 192:	83 bf       	out	0x33, r24	; 51
+
+    // Set initial pulse width to the first sample (first value)
+    OCR0A = 0; 
+ 194:	16 be       	out	0x36, r1	; 54
+    sample = 0;
+ 196:	10 92 67 00 	sts	0x0067, r1
+ 19a:	10 92 66 00 	sts	0x0066, r1
+
+    // Set up Timer 1 to send a sample every interrupt.
+    cli();
+ 19e:	f8 94       	cli
+
+    
+    // Set CTC mode (Clear Timer on Compare Match) (p.133)
+    // Have to set OCR1A *after*, otherwise it gets reset to 0!
+    TCCR1B = (TCCR1B & ~_BV(WGM13)) | _BV(WGM12);
+ 1a0:	8e b5       	in	r24, 0x2e	; 46
+ 1a2:	87 7e       	andi	r24, 0xE7	; 231
+ 1a4:	88 60       	ori	r24, 0x08	; 8
+ 1a6:	8e bd       	out	0x2e, r24	; 46
+    TCCR1A = TCCR1A & ~(_BV(WGM11) | _BV(WGM10));
+ 1a8:	8f b5       	in	r24, 0x2f	; 47
+ 1aa:	8c 7f       	andi	r24, 0xFC	; 252
+ 1ac:	8f bd       	out	0x2f, r24	; 47
+
+    // No prescaler (p.134)
+    TCCR1B = (TCCR1B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
+ 1ae:	8e b5       	in	r24, 0x2e	; 46
+ 1b0:	88 7f       	andi	r24, 0xF8	; 248
+ 1b2:	81 60       	ori	r24, 0x01	; 1
+ 1b4:	8e bd       	out	0x2e, r24	; 46
+
+    // Set the compare register (OCR1A).
+    // OCR1A is a 16-bit register, so we have to do this with
+    // interrupts disabled to be safe.
+    OCR1A = F_CPU / SAMPLE_RATE;    
+ 1b6:	88 ee       	ldi	r24, 0xE8	; 232
+ 1b8:	93 e0       	ldi	r25, 0x03	; 3
+ 1ba:	9b bd       	out	0x2b, r25	; 43
+ 1bc:	8a bd       	out	0x2a, r24	; 42
+    // 16e6 / 8000 = 2000, 1e6/8000= 125, 8e6/8000 = 1000, also the cycles we have per sample.
+
+    // Enable interrupt when TCNT1 == OCR1A on output compare
+    TIMSK |= _BV(OCIE1A);
+ 1be:	89 b7       	in	r24, 0x39	; 57
+ 1c0:	80 64       	ori	r24, 0x40	; 64
+ 1c2:	89 bf       	out	0x39, r24	; 57
+
+    sei();
+ 1c4:	78 94       	sei
+}
+ 1c6:	ca 5f       	subi	r28, 0xFA	; 250
+ 1c8:	cd bf       	out	0x3d, r28	; 61
+ 1ca:	df 91       	pop	r29
+ 1cc:	cf 91       	pop	r28
+ 1ce:	1f 91       	pop	r17
+ 1d0:	0f 91       	pop	r16
+ 1d2:	ff 90       	pop	r15
+ 1d4:	ef 90       	pop	r14
+ 1d6:	08 95       	ret
+
+000001d8 <stop>:
+
+
+static void dataflash_arrayread_end()
+/* alwayts start at th beginning of a page (normal) */
+{
+    HIGH_CS;
+ 1d8:	c4 9a       	sbi	0x18, 4	; 24
+    // End continuous read Dataflash
+
+    dataflash_arrayread_end();
+
+    // Disable playback per-sample interrupt.
+    TIMSK &= ~_BV(OCIE1A);
+ 1da:	89 b7       	in	r24, 0x39	; 57
+ 1dc:	8f 7b       	andi	r24, 0xBF	; 191
+ 1de:	89 bf       	out	0x39, r24	; 57
+
+    // Disable the per-sample timer completely.
+    TCCR1B &= ~_BV(CS10);
+ 1e0:	8e b5       	in	r24, 0x2e	; 46
+ 1e2:	8e 7f       	andi	r24, 0xFE	; 254
+ 1e4:	8e bd       	out	0x2e, r24	; 46
+
+    // Disable the PWM timer.
+    TCCR0B &= ~_BV(CS10);
+ 1e6:	83 b7       	in	r24, 0x33	; 51
+ 1e8:	8e 7f       	andi	r24, 0xFE	; 254
+ 1ea:	83 bf       	out	0x33, r24	; 51
+
+    // set to low
+    PORTB &= ~_BV(SPEAKER_PIN);
+ 1ec:	c2 98       	cbi	0x18, 2	; 24
+ 1ee:	08 95       	ret
+
+000001f0 <__vector_4>:
+}
+
+void stop(void); 
+
+// This is called at 8000 Hz to load the next sample.
+ISR(TIMER1_COMPA_vect) {
+ 1f0:	1f 92       	push	r1
+ 1f2:	0f 92       	push	r0
+ 1f4:	0f b6       	in	r0, 0x3f	; 63
+ 1f6:	0f 92       	push	r0
+ 1f8:	11 24       	eor	r1, r1
+ 1fa:	2f 93       	push	r18
+ 1fc:	3f 93       	push	r19
+ 1fe:	4f 93       	push	r20
+ 200:	5f 93       	push	r21
+ 202:	6f 93       	push	r22
+ 204:	7f 93       	push	r23
+ 206:	8f 93       	push	r24
+ 208:	9f 93       	push	r25
+ 20a:	af 93       	push	r26
+ 20c:	bf 93       	push	r27
+ 20e:	ef 93       	push	r30
+ 210:	ff 93       	push	r31
+    if (!sounddata_length) {
+ 212:	80 91 64 00 	lds	r24, 0x0064
+ 216:	90 91 65 00 	lds	r25, 0x0065
+ 21a:	89 2b       	or	r24, r25
+ 21c:	11 f4       	brne	.+4      	; 0x222 <__vector_4+0x32>
+        // {
+        //     sample--;
+        //     OCR0A = sample;
+        // }
+        // else
+            stop(); 
+ 21e:	dc df       	rcall	.-72     	; 0x1d8 <stop>
+ 220:	15 c0       	rjmp	.+42     	; 0x24c <__vector_4+0x5c>
+    }
+    else {
+        sounddata_length--;
+ 222:	80 91 64 00 	lds	r24, 0x0064
+ 226:	90 91 65 00 	lds	r25, 0x0065
+ 22a:	01 97       	sbiw	r24, 0x01	; 1
+ 22c:	90 93 65 00 	sts	0x0065, r25
+ 230:	80 93 64 00 	sts	0x0064, r24
+        // DPCM ?
+        OCR0A = sample;
+ 234:	80 91 66 00 	lds	r24, 0x0066
+ 238:	90 91 67 00 	lds	r25, 0x0067
+ 23c:	86 bf       	out	0x36, r24	; 54
+}
+
+static uint8_t dataflash_arrayread_read()
+/* alwayts start at th beginning of a page (normal) */
+{
+    return spi_transfer(55); // dont care oput 
+ 23e:	87 e3       	ldi	r24, 0x37	; 55
+ 240:	0c df       	rcall	.-488    	; 0x5a <spi_transfer>
+    else {
+        sounddata_length--;
+        // DPCM ?
+        OCR0A = sample;
+        // load next sample
+        sample = dataflash_arrayread_read(); // read next sample
+ 242:	90 e0       	ldi	r25, 0x00	; 0
+ 244:	90 93 67 00 	sts	0x0067, r25
+ 248:	80 93 66 00 	sts	0x0066, r24
+    }
+}
+ 24c:	ff 91       	pop	r31
+ 24e:	ef 91       	pop	r30
+ 250:	bf 91       	pop	r27
+ 252:	af 91       	pop	r26
+ 254:	9f 91       	pop	r25
+ 256:	8f 91       	pop	r24
+ 258:	7f 91       	pop	r23
+ 25a:	6f 91       	pop	r22
+ 25c:	5f 91       	pop	r21
+ 25e:	4f 91       	pop	r20
+ 260:	3f 91       	pop	r19
+ 262:	2f 91       	pop	r18
+ 264:	0f 90       	pop	r0
+ 266:	0f be       	out	0x3f, r0	; 63
+ 268:	0f 90       	pop	r0
+ 26a:	1f 90       	pop	r1
+ 26c:	18 95       	reti
+
+0000026e <wait_snd>:
+}
+
+void wait_snd() 
+// attend le stop
+{
+    while(sounddata_length>0 ); 
+ 26e:	80 91 64 00 	lds	r24, 0x0064
+ 272:	90 91 65 00 	lds	r25, 0x0065
+ 276:	89 2b       	or	r24, r25
+ 278:	d1 f7       	brne	.-12     	; 0x26e <wait_snd>
+}
+ 27a:	08 95       	ret
+
+0000027c <play>:
+
+void play(uint8_t sample_id)
+{
+    play_nowait(sample_id);
+ 27c:	15 df       	rcall	.-470    	; 0xa8 <play_nowait>
+    wait_snd();
+ 27e:	f7 df       	rcall	.-18     	; 0x26e <wait_snd>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+ 280:	2f ef       	ldi	r18, 0xFF	; 255
+ 282:	80 e7       	ldi	r24, 0x70	; 112
+ 284:	92 e0       	ldi	r25, 0x02	; 2
+ 286:	21 50       	subi	r18, 0x01	; 1
+ 288:	80 40       	sbci	r24, 0x00	; 0
+ 28a:	90 40       	sbci	r25, 0x00	; 0
+ 28c:	e1 f7       	brne	.-8      	; 0x286 <play+0xa>
+ 28e:	00 c0       	rjmp	.+0      	; 0x290 <play+0x14>
+ 290:	00 00       	nop
+ 292:	08 95       	ret
+
+00000294 <set_led>:
+    _delay_ms(100); // this was 100
+}
+
+void set_led(uint8_t on)
+{
+    if (on)
+ 294:	88 23       	and	r24, r24
+ 296:	11 f0       	breq	.+4      	; 0x29c <set_led+0x8>
+        PORTD |= (1 << LED_PIN);
+ 298:	91 9a       	sbi	0x12, 1	; 18
+ 29a:	08 95       	ret
+    else
+        PORTD &= ~(1 << LED_PIN);
+ 29c:	91 98       	cbi	0x12, 1	; 18
+ 29e:	08 95       	ret
+
+000002a0 <wait_but>:
+/* attend <max_tenth> 1/10s seconds at most. 
+ * returns the number of 1/10s pressed, at least 1 
+ * or 0 if not pressed before timeout 
+ * *** DEBOUNCE !
+ */
+{   
+ 2a0:	0f 93       	push	r16
+ 2a2:	1f 93       	push	r17
+ 2a4:	cf 93       	push	r28
+ 2a6:	df 93       	push	r29
+ 2a8:	18 2f       	mov	r17, r24
+ 2aa:	2f ef       	ldi	r18, 0xFF	; 255
+ 2ac:	80 e7       	ldi	r24, 0x70	; 112
+ 2ae:	92 e0       	ldi	r25, 0x02	; 2
+ 2b0:	21 50       	subi	r18, 0x01	; 1
+ 2b2:	80 40       	sbci	r24, 0x00	; 0
+ 2b4:	90 40       	sbci	r25, 0x00	; 0
+ 2b6:	e1 f7       	brne	.-8      	; 0x2b0 <wait_but+0x10>
+ 2b8:	00 c0       	rjmp	.+0      	; 0x2ba <wait_but+0x1a>
+ 2ba:	00 00       	nop
+    _delay_ms(100);
+    for (uint8_t tenth=1;tenth<max_tenth;tenth++)
+ 2bc:	12 30       	cpi	r17, 0x02	; 2
+ 2be:	00 f5       	brcc	.+64     	; 0x300 <wait_but+0x60>
+             // adds randomness ton rand
+            rand();
+            _delay_ms(10);
+        }
+    }
+    return BUT_TIMEOUT;
+ 2c0:	df ef       	ldi	r29, 0xFF	; 255
+ 2c2:	2b c0       	rjmp	.+86     	; 0x31a <wait_but+0x7a>
+{   
+    _delay_ms(100);
+    for (uint8_t tenth=1;tenth<max_tenth;tenth++)
+    {
+        // flash led quickly 
+        if ((tenth&3) ==0) {
+ 2c4:	8d 2f       	mov	r24, r29
+ 2c6:	83 70       	andi	r24, 0x03	; 3
+ 2c8:	e9 f4       	brne	.+58     	; 0x304 <wait_but+0x64>
+            set_led(1);
+ 2ca:	81 e0       	ldi	r24, 0x01	; 1
+ 2cc:	e3 df       	rcall	.-58     	; 0x294 <set_led>
+ 2ce:	8f e3       	ldi	r24, 0x3F	; 63
+ 2d0:	9c e9       	ldi	r25, 0x9C	; 156
+ 2d2:	01 97       	sbiw	r24, 0x01	; 1
+ 2d4:	f1 f7       	brne	.-4      	; 0x2d2 <wait_but+0x32>
+ 2d6:	00 c0       	rjmp	.+0      	; 0x2d8 <wait_but+0x38>
+ 2d8:	00 00       	nop
+            _delay_ms(20);
+            set_led(0);    
+ 2da:	80 e0       	ldi	r24, 0x00	; 0
+ 2dc:	db df       	rcall	.-74     	; 0x294 <set_led>
+ 2de:	12 c0       	rjmp	.+36     	; 0x304 <wait_but+0x64>
+        }
+        
+        for (uint8_t i=0;i<10;i++)
+        {
+            if (BUTTON_PRESSED) return tenth;
+ 2e0:	82 9b       	sbis	0x10, 2	; 16
+ 2e2:	1b c0       	rjmp	.+54     	; 0x31a <wait_but+0x7a>
+             // adds randomness ton rand
+            rand();
+ 2e4:	89 d0       	rcall	.+274    	; 0x3f8 <rand>
+ 2e6:	8f e1       	ldi	r24, 0x1F	; 31
+ 2e8:	9e e4       	ldi	r25, 0x4E	; 78
+ 2ea:	01 97       	sbiw	r24, 0x01	; 1
+ 2ec:	f1 f7       	brne	.-4      	; 0x2ea <wait_but+0x4a>
+ 2ee:	00 c0       	rjmp	.+0      	; 0x2f0 <wait_but+0x50>
+ 2f0:	00 00       	nop
+ 2f2:	c1 50       	subi	r28, 0x01	; 1
+            set_led(1);
+            _delay_ms(20);
+            set_led(0);    
+        }
+        
+        for (uint8_t i=0;i<10;i++)
+ 2f4:	a9 f7       	brne	.-22     	; 0x2e0 <wait_but+0x40>
+ * or 0 if not pressed before timeout 
+ * *** DEBOUNCE !
+ */
+{   
+    _delay_ms(100);
+    for (uint8_t tenth=1;tenth<max_tenth;tenth++)
+ 2f6:	df 5f       	subi	r29, 0xFF	; 255
+ 2f8:	d1 13       	cpse	r29, r17
+ 2fa:	e4 cf       	rjmp	.-56     	; 0x2c4 <wait_but+0x24>
+             // adds randomness ton rand
+            rand();
+            _delay_ms(10);
+        }
+    }
+    return BUT_TIMEOUT;
+ 2fc:	df ef       	ldi	r29, 0xFF	; 255
+ 2fe:	0d c0       	rjmp	.+26     	; 0x31a <wait_but+0x7a>
+ * or 0 if not pressed before timeout 
+ * *** DEBOUNCE !
+ */
+{   
+    _delay_ms(100);
+    for (uint8_t tenth=1;tenth<max_tenth;tenth++)
+ 300:	d1 e0       	ldi	r29, 0x01	; 1
+ 302:	09 e0       	ldi	r16, 0x09	; 9
+            set_led(0);    
+        }
+        
+        for (uint8_t i=0;i<10;i++)
+        {
+            if (BUTTON_PRESSED) return tenth;
+ 304:	82 9b       	sbis	0x10, 2	; 16
+ 306:	09 c0       	rjmp	.+18     	; 0x31a <wait_but+0x7a>
+             // adds randomness ton rand
+            rand();
+ 308:	77 d0       	rcall	.+238    	; 0x3f8 <rand>
+ 30a:	8f e1       	ldi	r24, 0x1F	; 31
+ 30c:	9e e4       	ldi	r25, 0x4E	; 78
+ 30e:	01 97       	sbiw	r24, 0x01	; 1
+ 310:	f1 f7       	brne	.-4      	; 0x30e <wait_but+0x6e>
+ 312:	00 c0       	rjmp	.+0      	; 0x314 <wait_but+0x74>
+ 314:	00 00       	nop
+ 316:	c0 2f       	mov	r28, r16
+ 318:	e3 cf       	rjmp	.-58     	; 0x2e0 <wait_but+0x40>
+            _delay_ms(10);
+        }
+    }
+    return BUT_TIMEOUT;
+}
+ 31a:	8d 2f       	mov	r24, r29
+ 31c:	df 91       	pop	r29
+ 31e:	cf 91       	pop	r28
+ 320:	1f 91       	pop	r17
+ 322:	0f 91       	pop	r16
+ 324:	08 95       	ret
+
+00000326 <main>:
+};
+
+
+int main()
+{
+	setup();
+ 326:	aa de       	rcall	.-684    	; 0x7c <setup>
+	wait_but(1);
+ 328:	81 e0       	ldi	r24, 0x01	; 1
+ 32a:	ba df       	rcall	.-140    	; 0x2a0 <wait_but>
+	while(1)
+	{
+		play(1);
+ 32c:	81 e0       	ldi	r24, 0x01	; 1
+ 32e:	a6 df       	rcall	.-180    	; 0x27c <play>
+ 330:	fd cf       	rjmp	.-6      	; 0x32c <main+0x6>
+
+00000332 <__mulhi3>:
+ 332:	55 27       	eor	r21, r21
+ 334:	00 24       	eor	r0, r0
+
+00000336 <__mulhi3_loop>:
+ 336:	80 ff       	sbrs	r24, 0
+ 338:	02 c0       	rjmp	.+4      	; 0x33e <__mulhi3_skip1>
+ 33a:	06 0e       	add	r0, r22
+ 33c:	57 1f       	adc	r21, r23
+
+0000033e <__mulhi3_skip1>:
+ 33e:	66 0f       	add	r22, r22
+ 340:	77 1f       	adc	r23, r23
+ 342:	61 15       	cp	r22, r1
+ 344:	71 05       	cpc	r23, r1
+ 346:	21 f0       	breq	.+8      	; 0x350 <__mulhi3_exit>
+ 348:	96 95       	lsr	r25
+ 34a:	87 95       	ror	r24
+ 34c:	00 97       	sbiw	r24, 0x00	; 0
+ 34e:	99 f7       	brne	.-26     	; 0x336 <__mulhi3_loop>
+
+00000350 <__mulhi3_exit>:
+ 350:	95 2f       	mov	r25, r21
+ 352:	80 2d       	mov	r24, r0
+ 354:	08 95       	ret
+
+00000356 <do_rand>:
+ 356:	8f 92       	push	r8
+ 358:	9f 92       	push	r9
+ 35a:	af 92       	push	r10
+ 35c:	bf 92       	push	r11
+ 35e:	cf 92       	push	r12
+ 360:	df 92       	push	r13
+ 362:	ef 92       	push	r14
+ 364:	ff 92       	push	r15
+ 366:	cf 93       	push	r28
+ 368:	df 93       	push	r29
+ 36a:	ec 01       	movw	r28, r24
+ 36c:	68 81       	ld	r22, Y
+ 36e:	79 81       	ldd	r23, Y+1	; 0x01
+ 370:	8a 81       	ldd	r24, Y+2	; 0x02
+ 372:	9b 81       	ldd	r25, Y+3	; 0x03
+ 374:	61 15       	cp	r22, r1
+ 376:	71 05       	cpc	r23, r1
+ 378:	81 05       	cpc	r24, r1
+ 37a:	91 05       	cpc	r25, r1
+ 37c:	21 f4       	brne	.+8      	; 0x386 <do_rand+0x30>
+ 37e:	64 e2       	ldi	r22, 0x24	; 36
+ 380:	79 ed       	ldi	r23, 0xD9	; 217
+ 382:	8b e5       	ldi	r24, 0x5B	; 91
+ 384:	97 e0       	ldi	r25, 0x07	; 7
+ 386:	2d e1       	ldi	r18, 0x1D	; 29
+ 388:	33 ef       	ldi	r19, 0xF3	; 243
+ 38a:	41 e0       	ldi	r20, 0x01	; 1
+ 38c:	50 e0       	ldi	r21, 0x00	; 0
+ 38e:	5c d0       	rcall	.+184    	; 0x448 <__divmodsi4>
+ 390:	49 01       	movw	r8, r18
+ 392:	5a 01       	movw	r10, r20
+ 394:	27 ea       	ldi	r18, 0xA7	; 167
+ 396:	31 e4       	ldi	r19, 0x41	; 65
+ 398:	40 e0       	ldi	r20, 0x00	; 0
+ 39a:	50 e0       	ldi	r21, 0x00	; 0
+ 39c:	3c d0       	rcall	.+120    	; 0x416 <__mulsi3>
+ 39e:	6b 01       	movw	r12, r22
+ 3a0:	7c 01       	movw	r14, r24
+ 3a2:	2c ee       	ldi	r18, 0xEC	; 236
+ 3a4:	34 ef       	ldi	r19, 0xF4	; 244
+ 3a6:	4f ef       	ldi	r20, 0xFF	; 255
+ 3a8:	5f ef       	ldi	r21, 0xFF	; 255
+ 3aa:	c5 01       	movw	r24, r10
+ 3ac:	b4 01       	movw	r22, r8
+ 3ae:	33 d0       	rcall	.+102    	; 0x416 <__mulsi3>
+ 3b0:	ab 01       	movw	r20, r22
+ 3b2:	bc 01       	movw	r22, r24
+ 3b4:	c4 0e       	add	r12, r20
+ 3b6:	d5 1e       	adc	r13, r21
+ 3b8:	e6 1e       	adc	r14, r22
+ 3ba:	f7 1e       	adc	r15, r23
+ 3bc:	f7 fe       	sbrs	r15, 7
+ 3be:	06 c0       	rjmp	.+12     	; 0x3cc <do_rand+0x76>
+ 3c0:	81 e0       	ldi	r24, 0x01	; 1
+ 3c2:	c8 1a       	sub	r12, r24
+ 3c4:	d1 08       	sbc	r13, r1
+ 3c6:	e1 08       	sbc	r14, r1
+ 3c8:	80 e8       	ldi	r24, 0x80	; 128
+ 3ca:	f8 0a       	sbc	r15, r24
+ 3cc:	c8 82       	st	Y, r12
+ 3ce:	d9 82       	std	Y+1, r13	; 0x01
+ 3d0:	ea 82       	std	Y+2, r14	; 0x02
+ 3d2:	fb 82       	std	Y+3, r15	; 0x03
+ 3d4:	e8 94       	clt
+ 3d6:	d7 f8       	bld	r13, 7
+ 3d8:	ee 24       	eor	r14, r14
+ 3da:	ff 24       	eor	r15, r15
+ 3dc:	c6 01       	movw	r24, r12
+ 3de:	df 91       	pop	r29
+ 3e0:	cf 91       	pop	r28
+ 3e2:	ff 90       	pop	r15
+ 3e4:	ef 90       	pop	r14
+ 3e6:	df 90       	pop	r13
+ 3e8:	cf 90       	pop	r12
+ 3ea:	bf 90       	pop	r11
+ 3ec:	af 90       	pop	r10
+ 3ee:	9f 90       	pop	r9
+ 3f0:	8f 90       	pop	r8
+ 3f2:	08 95       	ret
+
+000003f4 <rand_r>:
+ 3f4:	b0 df       	rcall	.-160    	; 0x356 <do_rand>
+ 3f6:	08 95       	ret
+
+000003f8 <rand>:
+ 3f8:	80 e6       	ldi	r24, 0x60	; 96
+ 3fa:	90 e0       	ldi	r25, 0x00	; 0
+ 3fc:	ac df       	rcall	.-168    	; 0x356 <do_rand>
+ 3fe:	08 95       	ret
+
+00000400 <srand>:
+ 400:	a0 e0       	ldi	r26, 0x00	; 0
+ 402:	b0 e0       	ldi	r27, 0x00	; 0
+ 404:	80 93 60 00 	sts	0x0060, r24
+ 408:	90 93 61 00 	sts	0x0061, r25
+ 40c:	a0 93 62 00 	sts	0x0062, r26
+ 410:	b0 93 63 00 	sts	0x0063, r27
+ 414:	08 95       	ret
+
+00000416 <__mulsi3>:
+ 416:	ff 27       	eor	r31, r31
+ 418:	ee 27       	eor	r30, r30
+ 41a:	bb 27       	eor	r27, r27
+ 41c:	aa 27       	eor	r26, r26
+
+0000041e <__mulsi3_loop>:
+ 41e:	60 ff       	sbrs	r22, 0
+ 420:	04 c0       	rjmp	.+8      	; 0x42a <__mulsi3_skip1>
+ 422:	a2 0f       	add	r26, r18
+ 424:	b3 1f       	adc	r27, r19
+ 426:	e4 1f       	adc	r30, r20
+ 428:	f5 1f       	adc	r31, r21
+
+0000042a <__mulsi3_skip1>:
+ 42a:	22 0f       	add	r18, r18
+ 42c:	33 1f       	adc	r19, r19
+ 42e:	44 1f       	adc	r20, r20
+ 430:	55 1f       	adc	r21, r21
+ 432:	96 95       	lsr	r25
+ 434:	87 95       	ror	r24
+ 436:	77 95       	ror	r23
+ 438:	67 95       	ror	r22
+ 43a:	89 f7       	brne	.-30     	; 0x41e <__mulsi3_loop>
+ 43c:	00 97       	sbiw	r24, 0x00	; 0
+ 43e:	76 07       	cpc	r23, r22
+ 440:	71 f7       	brne	.-36     	; 0x41e <__mulsi3_loop>
+
+00000442 <__mulsi3_exit>:
+ 442:	cf 01       	movw	r24, r30
+ 444:	bd 01       	movw	r22, r26
+ 446:	08 95       	ret
+
+00000448 <__divmodsi4>:
+ 448:	05 2e       	mov	r0, r21
+ 44a:	97 fb       	bst	r25, 7
+ 44c:	16 f4       	brtc	.+4      	; 0x452 <__divmodsi4+0xa>
+ 44e:	00 94       	com	r0
+ 450:	06 d0       	rcall	.+12     	; 0x45e <__divmodsi4_neg1>
+ 452:	57 fd       	sbrc	r21, 7
+ 454:	0c d0       	rcall	.+24     	; 0x46e <__divmodsi4_neg2>
+ 456:	13 d0       	rcall	.+38     	; 0x47e <__udivmodsi4>
+ 458:	07 fc       	sbrc	r0, 7
+ 45a:	09 d0       	rcall	.+18     	; 0x46e <__divmodsi4_neg2>
+ 45c:	7e f4       	brtc	.+30     	; 0x47c <__divmodsi4_exit>
+
+0000045e <__divmodsi4_neg1>:
+ 45e:	90 95       	com	r25
+ 460:	80 95       	com	r24
+ 462:	70 95       	com	r23
+ 464:	61 95       	neg	r22
+ 466:	7f 4f       	sbci	r23, 0xFF	; 255
+ 468:	8f 4f       	sbci	r24, 0xFF	; 255
+ 46a:	9f 4f       	sbci	r25, 0xFF	; 255
+ 46c:	08 95       	ret
+
+0000046e <__divmodsi4_neg2>:
+ 46e:	50 95       	com	r21
+ 470:	40 95       	com	r20
+ 472:	30 95       	com	r19
+ 474:	21 95       	neg	r18
+ 476:	3f 4f       	sbci	r19, 0xFF	; 255
+ 478:	4f 4f       	sbci	r20, 0xFF	; 255
+ 47a:	5f 4f       	sbci	r21, 0xFF	; 255
+
+0000047c <__divmodsi4_exit>:
+ 47c:	08 95       	ret
+
+0000047e <__udivmodsi4>:
+ 47e:	a1 e2       	ldi	r26, 0x21	; 33
+ 480:	1a 2e       	mov	r1, r26
+ 482:	aa 1b       	sub	r26, r26
+ 484:	bb 1b       	sub	r27, r27
+ 486:	fd 01       	movw	r30, r26
+ 488:	0d c0       	rjmp	.+26     	; 0x4a4 <__udivmodsi4_ep>
+
+0000048a <__udivmodsi4_loop>:
+ 48a:	aa 1f       	adc	r26, r26
+ 48c:	bb 1f       	adc	r27, r27
+ 48e:	ee 1f       	adc	r30, r30
+ 490:	ff 1f       	adc	r31, r31
+ 492:	a2 17       	cp	r26, r18
+ 494:	b3 07       	cpc	r27, r19
+ 496:	e4 07       	cpc	r30, r20
+ 498:	f5 07       	cpc	r31, r21
+ 49a:	20 f0       	brcs	.+8      	; 0x4a4 <__udivmodsi4_ep>
+ 49c:	a2 1b       	sub	r26, r18
+ 49e:	b3 0b       	sbc	r27, r19
+ 4a0:	e4 0b       	sbc	r30, r20
+ 4a2:	f5 0b       	sbc	r31, r21
+
+000004a4 <__udivmodsi4_ep>:
+ 4a4:	66 1f       	adc	r22, r22
+ 4a6:	77 1f       	adc	r23, r23
+ 4a8:	88 1f       	adc	r24, r24
+ 4aa:	99 1f       	adc	r25, r25
+ 4ac:	1a 94       	dec	r1
+ 4ae:	69 f7       	brne	.-38     	; 0x48a <__udivmodsi4_loop>
+ 4b0:	60 95       	com	r22
+ 4b2:	70 95       	com	r23
+ 4b4:	80 95       	com	r24
+ 4b6:	90 95       	com	r25
+ 4b8:	9b 01       	movw	r18, r22
+ 4ba:	ac 01       	movw	r20, r24
+ 4bc:	bd 01       	movw	r22, r26
+ 4be:	cf 01       	movw	r24, r30
+ 4c0:	08 95       	ret
+
+000004c2 <_exit>:
+ 4c2:	f8 94       	cli
+
+000004c4 <__stop_program>:
+ 4c4:	ff cf       	rjmp	.-2      	; 0x4c4 <__stop_program>
