@@ -9,6 +9,8 @@ enjoy ! -- makapuf
 
 cbonsig fork
 ============
+* myflasher_github: Arduino code to manage communication from computer to Dataflash
+* myflasher_python: Python code to format and write 8-bit WAV files to Dataflash
 * revised Arduino code for compatibility with 1.0.5
 * ported to the Dataflash library by @BlockoS
 * revised Python to work with these changes
